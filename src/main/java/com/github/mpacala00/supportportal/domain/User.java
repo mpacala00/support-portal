@@ -38,5 +38,5 @@ public class User implements Serializable {
     private String[] authoritites; //delete, read, update etc
 
     private boolean isActive; //activate acc after email confirmation
-    private boolean isLocked; //for blocking accounts functionality
+    private boolean isNotLocked; //for blocking accounts functionality
 }
