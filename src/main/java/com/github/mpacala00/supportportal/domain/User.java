@@ -1,10 +1,24 @@
 package com.github.mpacala00.supportportal.domain;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
 
+@Data //getters & setters, toString, equalsAndHashCode, requiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Entity
 public class User implements Serializable {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(nullable = false, updatable = false)
     private Long id; //id for database
     private String userId; //id for display
 
