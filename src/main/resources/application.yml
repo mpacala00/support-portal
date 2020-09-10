@@ -1,0 +1,18 @@
+server:
+  port: 8081
+
+spring:
+  datasource:
+    #additional info passed in the url to use the correct timezone
+    url: jdbc:mysql://localhost:3306/support_portal?serverTimezone=Poland&useLegacyDatetimeCode=false
+    username: support_portal_user
+    password: password12
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create #always create database on startup
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        jdbc:
+          time_zone: Poland
