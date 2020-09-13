@@ -8,6 +8,8 @@ public class SupportPortalApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(SupportPortalApplication.class, args);
+//		JwtTokenProvider jwt = new JwtTokenProvider();
+//		System.out.println(jwt.generateJwtToken(new UserPrincipal(new User())));
 	}
 
 }

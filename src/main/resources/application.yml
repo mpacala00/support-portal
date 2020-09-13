@@ -16,3 +16,8 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
         jdbc:
           time_zone: Poland
+
+#security:
+#https://www.grc.com/passwords.htm for secure passwords, good for secrets
+jwt:
+  secret: 'zuLH}11~&}#mM/$5<)?)+w"{dL$B]e.gg3_>Kwj*(R.<#A=:+\(i+;&/ib*n(x'
