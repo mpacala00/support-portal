@@ -15,7 +15,6 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -72,8 +71,8 @@ public class JwtTokenProvider {
         return StringUtils.isNotEmpty(username) && !isTokenExpired(verifier, token);
     }
 
-    //subject is the user
-    private String getTokenSubject(String token) {
+    //subject is the  user
+    public String getTokenSubject(String token) {
         JWTVerifier verifier = getJWTVerifier();
         //the .verify() part of the function will check if the token is valid
         return verifier.verify(token).getSubject();
@@ -97,8 +96,7 @@ public class JwtTokenProvider {
         try {
             Algorithm algorithm = HMAC512(secret);
             verifier = JWT.require(algorithm).withIssuer(GET_ARRAYS).build();
-        }
-        catch(JWTVerificationException exception) {
+        } catch (JWTVerificationException exception) {
             //throwing new exception to not expose inner workings of the app
             throw new JWTVerificationException(TOKEN_CANNOT_BE_VERIFIED);
         }
@@ -107,11 +105,7 @@ public class JwtTokenProvider {
     }
 
     private String[] getClaimsForUser(UserPrincipal userPrincipal) {
-        List<String> authorities = new ArrayList<>();
-        for(GrantedAuthority grantedAuthority : userPrincipal.getAuthorities()) {
-            authorities.add(grantedAuthority.getAuthority());
-        }
-
-        return authorities.toArray(new String[authorities.size()]);
+        return userPrincipal.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority).toArray(String[]::new);
     }
 }
