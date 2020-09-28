@@ -2,6 +2,8 @@ server:
   port: 8081
 
 spring:
+  main:
+    banner-mode: "off"
   datasource:
     #additional info passed in the url to use the correct timezone
     url: jdbc:mysql://localhost:3306/support_portal?serverTimezone=Poland&useLegacyDatetimeCode=false
