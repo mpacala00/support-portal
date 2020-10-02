@@ -9,6 +9,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/user")
 public class UserController {
 
+    //this endpoint is not included in PUBLIC_URLS, so only authenticated user should be able to access this
+    @GetMapping("/home")
+    public String showUser() {
+        return "application works";
+    }
+
     @GetMapping
     public User showEmptyUser() {
         return new User().builder().id(1L).email("test@test.com").build();

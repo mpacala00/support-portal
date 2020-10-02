@@ -21,7 +21,7 @@ import java.time.LocalDate;
 //(rollback in case of failure) from business logic
 //it puts transactions on saving, updating, deleting etc. to db
 @Transactional
-@Qualifier("UserDetailsService") //name of the bean
+@Qualifier("userDetailsService") //name of the bean
 public class UserServiceImpl implements UserService, UserDetailsService {
 
     private Logger LOGGER = LoggerFactory.getLogger(getClass());
