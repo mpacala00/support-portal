@@ -5,6 +5,7 @@ import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.github.mpacala00.supportportal.domain.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.persistence.NoResultException;
@@ -27,7 +29,7 @@ import java.util.Objects;
  */
 
 @RestControllerAdvice
-public class ExceptionHandling {
+public class ExceptionHandling implements ErrorController {
     private final Logger log = LoggerFactory.getLogger(getClass());
     public static final String ACCOUNT_LOCKED = "Your account has been locked. Please contact support";
     //%s will be replaced with String.format()
@@ -37,6 +39,7 @@ public class ExceptionHandling {
     public static final String ACCOUNT_DISABLED = "Your account has been disabled. Please contact support";
     public static final String ERROR_PROCESSING_FILE = "Error occurred while processing file";
     public static final String NOT_ENOUGH_PERMISSION = "You do not have enough permission";
+    public static final String ERROR_PATH = "/error";
 
     //this annotation allows to handle certain exceptions
     //Exception can also be passed as an argument to the method but it will expose
@@ -48,6 +51,13 @@ public class ExceptionHandling {
     public ResponseEntity<HttpResponse> accountDisabledException() {
         return createHttpResponse(HttpStatus.BAD_REQUEST, ACCOUNT_DISABLED);
     }
+
+    //Override default whitelabel error
+    //use when disabling add-mappings
+//    @ExceptionHandler(NoHandlerFoundException.class)
+//    public ResponseEntity<HttpResponse> noHandlerFoundException(NoHandlerFoundException e) {
+//        return createHttpResponse(HttpStatus.NOT_FOUND, "Page not found");
+//    }
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<HttpResponse> badCredentialsException() {
@@ -113,5 +123,17 @@ public class ExceptionHandling {
         HttpResponse response = new HttpResponse(httpStatus.value(), httpStatus,
                 httpStatus.getReasonPhrase().toUpperCase(), msg.toUpperCase());
         return new ResponseEntity<>(response, httpStatus);
+    }
+
+    //mapping for custom response replacing whitelabel error page
+    @RequestMapping(ERROR_PATH)
+    public ResponseEntity<HttpResponse> notFoundResponse() {
+        return createHttpResponse(HttpStatus.NOT_FOUND, "no mapping for this url found");
+    }
+
+    //one of the best methods to disable default whitelabel error page is to implement ErrorController
+    @Override
+    public String getErrorPath() {
+        return ERROR_PATH;
     }
 }

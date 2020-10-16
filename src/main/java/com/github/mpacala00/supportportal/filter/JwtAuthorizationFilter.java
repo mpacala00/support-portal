@@ -38,7 +38,8 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     //this method will be called when a request is made
     //check if everything is valid basically
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         
         //method is POST, GET, DELETE etc.

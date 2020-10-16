@@ -1,7 +1,14 @@
 server:
   port: 8081
+  error: #set to false to allow servlet to send err
+    whitelabel:
+      enabled: false
 
 spring:
+#  mvc:
+#    throw-exception-if-no-handler-found: true #throw exception when page not found
+#  resources:
+#    add-mappings: false #dont use default white label error page
   main:
     banner-mode: "off"
   datasource:

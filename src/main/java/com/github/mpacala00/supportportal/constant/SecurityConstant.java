@@ -26,4 +26,6 @@ public class SecurityConstant {
     //not necessary but makes things clearer
     public static final String[] PUBLIC_URLS = { "/user/login", "/user/register", "/user/reset-password/**",
         "/user/image/**"};
+    //comment above and uncomment below to remove authentication steps
+    //public static final String[] PUBLIC_URLS = { "/**"};
 }
