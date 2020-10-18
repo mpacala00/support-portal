@@ -34,7 +34,7 @@ public class User implements Serializable {
     private LocalDate lastLoginDateDisplay;
 
     //splitting authorization into roles and authorities makes the system more modular
-    private String[] roles; //ROLE_USER, ROLE_ADMIN etc
+    private String role; //ROLE_USER, ROLE_ADMIN etc
     private String[] authoritites; //delete, read, update etc
 
     private boolean isActive; //activate acc after email confirmation
