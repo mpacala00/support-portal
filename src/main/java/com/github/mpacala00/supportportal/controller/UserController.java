@@ -1,21 +1,32 @@
 package com.github.mpacala00.supportportal.controller;
 
 import com.github.mpacala00.supportportal.domain.User;
-import com.github.mpacala00.supportportal.exception.domain.EmailNotFoundException;
-import com.github.mpacala00.supportportal.exception.domain.ExceptionHandling;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.github.mpacala00.supportportal.exception.domain.*;
+import com.github.mpacala00.supportportal.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(path = {"/", "/user"}) //home mapping "/" to handle error response that is mapped to /error
 //this extend will provide ExceptionHandlers
 public class UserController extends ExceptionHandling {
 
-    //this endpoint is not included in PUBLIC_URLS, so only authenticated user should be able to access this
-    @GetMapping("/home")
-    public String showUser() {
-        return "application works";
+    private final UserService userService;
+
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<User> register(@RequestBody User user)
+            throws UsernameExistsException, UserNotFoundException, EmailExistsException {
+        User registeredUser = userService.register(user.getFirstName(), user.getLastName(), user.getUsername(),
+                user.getEmail());
+
+        return new ResponseEntity<User>(registeredUser, HttpStatus.OK);
     }
 
     //test exceptions
