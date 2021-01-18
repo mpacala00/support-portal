@@ -19,7 +19,7 @@ spring:
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: create #always create database on startup
+      ddl-auto: create #create - update
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect

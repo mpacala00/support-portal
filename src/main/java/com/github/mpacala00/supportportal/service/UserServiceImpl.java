@@ -92,7 +92,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 .email(email).joinDate(LocalDate.now()).password(encodedPassword).isActive(true)
                 .isNotLocked(true).role(Role.ROLE_USER.name()).authoritites(Role.ROLE_USER.getAuthorities())
                 .profileImageUrl(getTempImageUrl()).build();
-        user.setUserId(generateUserId());
 
         userRepository.save(user);
         LOGGER.info("New user password: " + password);
@@ -132,7 +131,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             if(currentUser == null) {
                 throw new UserNotFoundException(NO_USER_FOUND + currentUsername);
             }
-
 
             //check if user is not null and it's ID is unique
             if(userByNewUsername != null && !currentUser.getId().equals(userByNewUsername.getId())) {
