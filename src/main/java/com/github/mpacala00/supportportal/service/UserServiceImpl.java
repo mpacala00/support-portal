@@ -38,21 +38,25 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private Logger LOGGER = LoggerFactory.getLogger(getClass());
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final LoginAttemptService loginAttemptService;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, LoginAttemptService loginAttemptService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.loginAttemptService = loginAttemptService;
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String username) {
 
         User user = userRepository.findByUsername(username);
         if(user == null) {
             LOGGER.error("User not found by username: "+username);
             throw new UsernameNotFoundException(NO_USER_FOUND+username);
         } else {
+            //if the account will be locked at this stage returning userPrincipal will not give authorization
+            validateLoginAttempt(user);
             user.setLastLoginDateDisplay(user.getLastLoginDate());
             user.setLastLoginDate(LocalDate.now());
             userRepository.save(user);
@@ -96,6 +100,19 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         userRepository.save(user);
         LOGGER.info("New user password: " + password);
         return user;
+    }
+
+    private void validateLoginAttempt(User user) {
+        if(user.isNotLocked()) {
+            if(loginAttemptService.maxAttemptsReached(user.getUsername())) {
+                user.setNotLocked(false); //lock the acc
+            } else {
+                user.setNotLocked(true);
+            }
+        } else {
+            //remove from logging cache cuz the account is locked
+            loginAttemptService.evictUserFromLoginAttemptCache(user.getUsername());
+        }
     }
 
     private String getTempImageUrl() {

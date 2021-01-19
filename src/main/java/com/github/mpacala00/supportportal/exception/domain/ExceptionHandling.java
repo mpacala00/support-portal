@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -68,10 +69,10 @@ public class ExceptionHandling implements ErrorController {
         return createHttpResponse(HttpStatus.FORBIDDEN, NOT_ENOUGH_PERMISSION);
     }
 
-//    @ExceptionHandler(LockedException.class)
-//    public ResponseEntity<HttpResponse> accountLockedException() {
-//        return createHttpResponse(HttpStatus.UNAUTHORIZED, ACCOUNT_LOCKED);
-//    }
+    @ExceptionHandler(LockedException.class)
+    public ResponseEntity<HttpResponse> accountLockedException() {
+        return createHttpResponse(HttpStatus.UNAUTHORIZED, ACCOUNT_LOCKED);
+    }
 
     @ExceptionHandler(TokenExpiredException.class)
     public ResponseEntity<HttpResponse> tokenExpiredException(TokenExpiredException e) {
