@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 public class LoginAttemptService {
+    //todo do not add to cache if user does not exist
 
     public static final int MAX_NUMBER_OF_ATTEMPTS = 15;
     //String - key, Integer - value
@@ -32,14 +33,22 @@ public class LoginAttemptService {
         loginAttemptCache.invalidate(username); //find the key and remove it from cache
     }
 
-    public void addUserToLoginAttemptCache(String username) throws ExecutionException {
+    public void addUserToLoginAttemptCache(String username) {
         int attempts = 0;
-
-        attempts = loginAttemptCache.get(username) + 1; //get the value from map and add 1 to it
+        try {
+            attempts = loginAttemptCache.get(username) + 1; //get the value from map and add 1 to it
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
         loginAttemptCache.put(username, attempts);
     }
 
-    public boolean maxAttemptsReached(String username) throws ExecutionException {
-        return loginAttemptCache.get(username) >= MAX_NUMBER_OF_ATTEMPTS;
+    public boolean maxAttemptsReached(String username) {
+        try {
+            return loginAttemptCache.get(username) >= MAX_NUMBER_OF_ATTEMPTS;
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        return false; //this is kinda not cool for security, too bad
     }
 }
