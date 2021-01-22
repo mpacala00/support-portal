@@ -14,6 +14,9 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 import static com.github.mpacala00.supportportal.constant.SecurityConstant.JWT_TOKEN_HEADER;
 
@@ -52,6 +55,22 @@ public class UserController extends ExceptionHandling {
         HttpHeaders jwtHeader = getJwtHeader(userPrincipal);
         //args are type of resEntity, headers, status
         return new ResponseEntity<>(loginUser, jwtHeader, HttpStatus.OK);
+    }
+
+    @PostMapping("/add")
+    public ResponseEntity<User> addNewUser(@RequestParam("firstName") String firstName,
+                                           @RequestParam("lastName") String lastName,
+                                           @RequestParam("username") String username,
+                                           @RequestParam("email") String email,
+                                           @RequestParam("role") String role,
+                                           @RequestParam("isActive") String isActive,
+                                           @RequestParam("isNotLocked") String isNotLocked,
+                                           @RequestParam(value = "profileImage", required = false) MultipartFile profileImage)
+            throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException {
+        User newUser = userService.addNewUser(firstName, lastName, username, email, role,
+                Boolean.parseBoolean(isNotLocked), Boolean.parseBoolean(isActive), profileImage);
+
+        return new ResponseEntity<>(newUser, HttpStatus.OK);
     }
 
     //test exceptions
