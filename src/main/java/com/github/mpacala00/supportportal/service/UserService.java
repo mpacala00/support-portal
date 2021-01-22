@@ -2,10 +2,13 @@ package com.github.mpacala00.supportportal.service;
 
 import com.github.mpacala00.supportportal.domain.User;
 import com.github.mpacala00.supportportal.exception.domain.EmailExistsException;
+import com.github.mpacala00.supportportal.exception.domain.EmailNotFoundException;
 import com.github.mpacala00.supportportal.exception.domain.UserNotFoundException;
 import com.github.mpacala00.supportportal.exception.domain.UsernameExistsException;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.mail.MessagingException;
+import java.io.IOException;
 import java.util.List;
 
 public interface UserService {
@@ -17,16 +20,18 @@ public interface UserService {
 
     List<User> getUsers();
 
+    void deleteUser(Long id);
+
     //for adding user as a super admin, for example
     User addNewUser(String firstName, String lastName, String username, String email, String role, boolean isNotLocked,
-                    boolean isActive, MultipartFile profileImage);
+                    boolean isActive, MultipartFile profileImage) throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException;
 
     //we need to know existing username to update its account, could also be done with user's id or just with
     //one method in interface and 2 implementations of it in the actual service
     User updateUser(String currentUsername, String newFirstName, String newLastName, String newUsername, String newEmail,
-                    String role, boolean isNotLocked, boolean isActive, MultipartFile profileImage);
+                    String role, boolean isNotLocked, boolean isActive, MultipartFile profileImage) throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException;
 
-    void resetPassword(String email);
+    void resetPassword(String email) throws EmailNotFoundException, MessagingException;
 
-    User updateProfileImage(String username, MultipartFile newProfileImage);
+    User updateProfileImage(String username, MultipartFile newProfileImage) throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException;
 }

@@ -4,6 +4,7 @@ import com.github.mpacala00.supportportal.domain.User;
 import com.github.mpacala00.supportportal.domain.UserPrincipal;
 import com.github.mpacala00.supportportal.enumeration.Role;
 import com.github.mpacala00.supportportal.exception.domain.EmailExistsException;
+import com.github.mpacala00.supportportal.exception.domain.EmailNotFoundException;
 import com.github.mpacala00.supportportal.exception.domain.UserNotFoundException;
 import com.github.mpacala00.supportportal.exception.domain.UsernameExistsException;
 import com.github.mpacala00.supportportal.repository.UserRepository;
@@ -18,14 +19,21 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.mail.MessagingException;
 import javax.transaction.Transactional;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.List;
 
+import static com.github.mpacala00.supportportal.constant.FileConstant.*;
 import static com.github.mpacala00.supportportal.constant.UserImplConstant.*;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 //@Slf4j can be used instead of the way that was used below
 @Service
@@ -86,19 +94,89 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public User register(String firstName,
-                         String lastName,
-                         String username,
-                         String email) throws UsernameExistsException, EmailExistsException, UserNotFoundException {
+    public User addNewUser(String firstName, String lastName, String username, String email, String role,
+                           boolean isNotLocked, boolean isActive, MultipartFile profileImage)
+            throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException {
+
+        validateUsernameAndEmail(StringUtils.EMPTY, username, email);
+
+        String password = generatePassword();
+        User user = User.builder()
+                .userId(generateUserId()) //userId is the one that will be displayed
+                .firstName(firstName)
+                .lastName(lastName)
+                .username(username)
+                .email(email)
+                .password(encodePassword(password))
+                .role(getRoleEnumName(role).name())
+                .authoritites(getRoleEnumName(role).getAuthorities())
+                .profileImageUrl(getTempImageUrl(username))
+                .isNotLocked(isNotLocked)
+                .isActive(isActive)
+                .build();
+        userRepository.save(user);
+        saveProfileImage(user, profileImage);
+        return user;
+    }
+
+    @Override
+    public User updateUser(String currentUsername, String newFirstName, String newLastName, String newUsername,
+                           String newEmail, String role, boolean isNotLocked, boolean isActive, MultipartFile profileImage)
+            throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException {
+
+        User currentUser = validateUsernameAndEmail(currentUsername, newUsername, newEmail);
+        //dont check if currentUser is null, exception will be thrown in such case
+        currentUser.setFirstName(newFirstName);
+        currentUser.setLastName(newLastName);
+        currentUser.setUsername(newUsername);
+        currentUser.setEmail(newEmail);
+        currentUser.setRole(getRoleEnumName(role).name());
+        currentUser.setAuthoritites(getRoleEnumName(role).getAuthorities());
+        currentUser.setNotLocked(isNotLocked);
+        currentUser.setActive(isActive);
+
+        userRepository.save(currentUser);
+        saveProfileImage(currentUser, profileImage);
+        return currentUser;
+    }
+
+    @Override
+    public void deleteUser(Long id) {
+        userRepository.deleteById(id);
+    }
+
+    @Override
+    public void resetPassword(String email) throws EmailNotFoundException, MessagingException {
+        User user = findByEmail(email);
+        if(user != null) {
+            String password = generatePassword();
+            user.setPassword(encodePassword(password));
+            userRepository.save(user);
+            emailService.sentNewPasswordEmail(user.getFirstName(), password, user.getEmail());
+        } else {
+            throw new EmailNotFoundException(NOT_FOUND_BY_EMAIL + email);
+        }
+    }
+
+    @Override
+    public User updateProfileImage(String username, MultipartFile newProfileImage)
+            throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException {
+        User user = validateUsernameAndEmail(username, null, null);
+        saveProfileImage(user, newProfileImage);
+        return user;
+    }
+
+    @Override
+    public User register(String firstName, String lastName, String username, String email)
+            throws UsernameExistsException, EmailExistsException, UserNotFoundException {
         //first arg empty because it is a registration
         validateUsernameAndEmail(StringUtils.EMPTY, email, email);
 
         String password = generatePassword();
-        String encodedPassword = encodePassword(password);
-        User user = User.builder().firstName(firstName).lastName(lastName).username(username)
-                .email(email).joinDate(LocalDate.now()).password(encodedPassword).isActive(true)
+        User user = User.builder().userId(generateUserId()).firstName(firstName).lastName(lastName).username(username)
+                .email(email).joinDate(LocalDate.now()).password(encodePassword(password)).isActive(true)
                 .isNotLocked(true).role(Role.ROLE_USER.name()).authoritites(Role.ROLE_USER.getAuthorities())
-                .profileImageUrl(getTempImageUrl()).build();
+                .profileImageUrl(getTempImageUrl(username)).build();
 
         userRepository.save(user);
         try {
@@ -121,10 +199,39 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         }
     }
 
-    private String getTempImageUrl() {
+    //this method needs to be well optimized, accessing file systems are time consuming
+    private void saveProfileImage(User user, MultipartFile profileImage) throws IOException {
+        if(profileImage != null) {
+            Path userFolder = Paths.get(USER_FOLDER + user.getUsername()).toAbsolutePath().normalize();
+            if(!Files.exists(userFolder)) {
+                Files.createDirectories(userFolder);
+                LOGGER.info(DIR_CREATED + userFolder);
+            }
+            //delete the old image file
+            Files.deleteIfExists(Paths.get(userFolder + user.getUsername() + DOT + JPG_EXTENSION));
+            Files.copy(profileImage.getInputStream(), userFolder.resolve(user.getUsername() + DOT + JPG_EXTENSION),
+                    REPLACE_EXISTING); //REPLACE_EXISTING is good enough if you dont want to deleteIfExists()
+            user.setProfileImageUrl(getImageUrl(user.getUsername()));
+            LOGGER.info(FILE_SAVED + profileImage.getOriginalFilename());
+        }
+    }
+
+    private Role getRoleEnumName(String role) {
+        return Role.valueOf(role.toUpperCase());
+    }
+
+    private String getTempImageUrl(String username) {
         //whatever the base url is of the site
         //http://localhost:8080 in case of running the app locally
-        return ServletUriComponentsBuilder.fromCurrentContextPath().path(TEMP_IMG_PATH).toUriString();
+        //adding the username to the path so we can send it to robohash and get a unique profile image
+        return ServletUriComponentsBuilder.fromCurrentContextPath().path(TEMP_IMG_PATH + username).toUriString();
+    }
+
+    //location of the image of specified user
+    private String getImageUrl(String username) {
+        return ServletUriComponentsBuilder
+                .fromCurrentContextPath()
+                .path(USER_IMAGE_PATH + username + FORWARD_SLASH + username + DOT + JPG_EXTENSION).toUriString();
     }
 
     private String encodePassword(String password) {
