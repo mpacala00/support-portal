@@ -20,6 +20,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.mail.MessagingException;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.List;
@@ -39,12 +40,14 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final LoginAttemptService loginAttemptService;
+    private final EmailService emailService;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, LoginAttemptService loginAttemptService) {
+    public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, LoginAttemptService loginAttemptService, EmailService emailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.loginAttemptService = loginAttemptService;
+        this.emailService = emailService;
     }
 
     @Override
@@ -98,17 +101,20 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 .profileImageUrl(getTempImageUrl()).build();
 
         userRepository.save(user);
+        try {
+            emailService.sentNewPasswordEmail(firstName, password, email);
+        } catch (MessagingException e) {
+            LOGGER.error("An error occured while sending e-mail containing password:");
+            e.printStackTrace();
+        }
+
         LOGGER.info("New user password: " + password);
         return user;
     }
 
     private void validateLoginAttempt(User user) {
         if(user.isNotLocked()) {
-            if(loginAttemptService.maxAttemptsReached(user.getUsername())) {
-                user.setNotLocked(false); //lock the acc
-            } else {
-                user.setNotLocked(true);
-            }
+            user.setNotLocked(!loginAttemptService.maxAttemptsReached(user.getUsername())); //lock the acc
         } else {
             //remove from logging cache cuz the account is locked
             loginAttemptService.evictUserFromLoginAttemptCache(user.getUsername());
