@@ -24,7 +24,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true) //security at a method
+//security at method level, i. e. @PreAuthorize(value = "hasAnyAuthority('user:delete')")
+//https://developer.okta.com/blog/2019/06/20/spring-preauthorize
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     JwtAuthorizationFilter filter;

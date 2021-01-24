@@ -1,5 +1,6 @@
 package com.github.mpacala00.supportportal.controller;
 
+import com.github.mpacala00.supportportal.domain.HttpResponse;
 import com.github.mpacala00.supportportal.domain.User;
 import com.github.mpacala00.supportportal.domain.UserPrincipal;
 import com.github.mpacala00.supportportal.exception.domain.*;
@@ -10,13 +11,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.mail.MessagingException;
 import java.io.IOException;
+import java.util.List;
 
 import static com.github.mpacala00.supportportal.constant.SecurityConstant.JWT_TOKEN_HEADER;
 
@@ -24,6 +28,8 @@ import static com.github.mpacala00.supportportal.constant.SecurityConstant.JWT_T
 @RequestMapping(path = {"/", "/user"}) //home mapping "/" to handle error response that is mapped to /error
 //this extend will provide ExceptionHandlers
 public class UserController extends ExceptionHandling {
+
+    public static final String EMAIL_SENT = "New password email was sent to: ";
 
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
@@ -73,11 +79,62 @@ public class UserController extends ExceptionHandling {
         return new ResponseEntity<>(newUser, HttpStatus.OK);
     }
 
-    //test exceptions
-    //replace public urls in SecurityConstant to bypass auth
-    @GetMapping("/exception")
-    public String testException() throws EmailNotFoundException {
-        throw new EmailNotFoundException("Not found");
+    @PostMapping("/update")
+    public ResponseEntity<User> updateUser(@RequestParam("currentUsername") String currentUsername,
+                                           @RequestParam("firstName") String firstName,
+                                           @RequestParam("lastName") String lastName,
+                                           @RequestParam("username") String username,
+                                           @RequestParam("email") String email,
+                                           @RequestParam("role") String role,
+                                           @RequestParam("isActive") String isActive,
+                                           @RequestParam("isNotLocked") String isNotLocked,
+                                           @RequestParam(value = "profileImage", required = false) MultipartFile profileImage)
+            throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException {
+        User updatedUser = userService.updateUser(currentUsername, firstName, lastName, username, email, role,
+                Boolean.parseBoolean(isNotLocked), Boolean.parseBoolean(isActive), profileImage);
+
+        return new ResponseEntity<>(updatedUser, HttpStatus.OK);
+    }
+
+    //ResponseEntity<?> can also be used if we don't want to be specific
+    @GetMapping("/find/{username}")
+    public ResponseEntity<User> getUserByUsername(@PathVariable("username") String username) {
+        User user = userService.findByUsername(username);
+        return new ResponseEntity<>(user, HttpStatus.OK);
+    }
+
+    @GetMapping("/all}")
+    public ResponseEntity<List<User>> getAllUsers() {
+        List<User> users = userService.findAll();
+        return new ResponseEntity<>(users, HttpStatus.OK);
+    }
+
+    //return HttpReponse for each method that returns void in userService
+    @GetMapping("/reset-password/{email}")
+    public ResponseEntity<HttpResponse> resetPassword(@PathVariable("email") String email) throws EmailNotFoundException, MessagingException {
+        userService.resetPassword(email);
+        return response(EMAIL_SENT + email, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasAnyAuthority('user:delete')")
+    public ResponseEntity<HttpResponse> deleteUser(@PathVariable("id") String id) {
+        userService.deleteUser(Long.valueOf(id));
+        return response("User of id " + id + " successfully deleted", HttpStatus.NO_CONTENT);
+    }
+
+    @PostMapping("/updateProfileImage")
+    public ResponseEntity<User> updateProfileImage(@RequestParam("username") String username,
+                                                   @RequestParam("profileImage") MultipartFile profileImage)
+            throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException {
+        User user = userService.updateProfileImage(username, profileImage);
+        return new ResponseEntity<>(user, HttpStatus.OK);
+    }
+
+    private ResponseEntity<HttpResponse> response(String message, HttpStatus status) {
+        HttpResponse body = new HttpResponse(status.value(), status, status.getReasonPhrase().toUpperCase(),
+                message.toUpperCase());
+        return new ResponseEntity<>(body, status);
     }
 
     private void authenticate(String username, String password) {
@@ -89,5 +146,12 @@ public class UserController extends ExceptionHandling {
         HttpHeaders headers = new HttpHeaders();
         headers.add(JWT_TOKEN_HEADER, tokenProvider.generateJwtToken(userPrincipal));
         return headers;
+    }
+
+    //test exceptions
+    //replace public urls in SecurityConstant to bypass auth
+    @GetMapping("/exception")
+    public String testException() throws EmailNotFoundException {
+        throw new EmailNotFoundException("Not found");
     }
 }

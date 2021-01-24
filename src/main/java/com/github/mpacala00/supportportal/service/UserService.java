@@ -18,7 +18,7 @@ public interface UserService {
 
     User register(String firstName, String lastName, String username, String email) throws UsernameExistsException, EmailExistsException, UserNotFoundException;
 
-    List<User> getUsers();
+    List<User> findAll();
 
     void deleteUser(Long id);
 
