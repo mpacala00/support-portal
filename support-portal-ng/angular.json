@@ -123,6 +123,10 @@
           }
         }
       }
-    }},
-  "defaultProject": "support-portal-ng"
+    }
+  },
+  "defaultProject": "support-portal-ng",
+  "cli": {
+    "analytics": false
+  }
 }
