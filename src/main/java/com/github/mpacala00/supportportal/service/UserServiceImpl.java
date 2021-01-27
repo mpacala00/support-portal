@@ -48,6 +48,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final LoginAttemptService loginAttemptService;
+
+    //emails disabled for now, it would require better implementation with gmail api
     private final EmailService emailService;
 
     @Autowired
@@ -179,12 +181,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 .profileImageUrl(getTempImageUrl(username)).build();
 
         userRepository.save(user);
-        try {
-            emailService.sentNewPasswordEmail(firstName, password, email);
-        } catch (MessagingException e) {
-            LOGGER.error("An error occured while sending e-mail containing password:");
-            e.printStackTrace();
-        }
+//        try {
+//            emailService.sentNewPasswordEmail(firstName, password, email);
+//        } catch (MessagingException e) {
+//            LOGGER.error("An error occured while sending e-mail containing password:");
+//            e.printStackTrace();
+//        }
 
         LOGGER.info("New user password: " + password);
         return user;
