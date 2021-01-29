@@ -1,7 +1,11 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { CookieService } from 'ngx-cookie-service';
+
+import { AuthenticationService } from './service/authentication.service';
+import { UserService } from './service/user.service';
+import { AuthInterceptor } from './interceptor/auth.interceptor';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -15,7 +19,8 @@ import { AppComponent } from './app.component';
       AppRoutingModule,
       HttpClientModule
    ],
-   providers: [CookieService],
+   providers: [CookieService, AuthenticationService, UserService,
+      { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }], //multi - many instances across many files
    bootstrap: [AppComponent]
 })
 export class AppModule { }
