@@ -6,6 +6,7 @@ import { CookieService } from 'ngx-cookie-service';
 import { AuthenticationService } from './service/authentication.service';
 import { UserService } from './service/user.service';
 import { AuthInterceptor } from './interceptor/auth.interceptor';
+import { AuthenticationGuard } from './guard/authentication.guard';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -19,7 +20,7 @@ import { AppComponent } from './app.component';
       AppRoutingModule,
       HttpClientModule
    ],
-   providers: [CookieService, AuthenticationService, UserService,
+   providers: [CookieService, AuthenticationService, UserService, AuthenticationGuard
       { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }], //multi - many instances across many files
    bootstrap: [AppComponent]
 })

@@ -38,7 +38,7 @@ export class AuthenticationService {
       this.cookies.deleteAll();
    }
 
-   public isLoggedIn(): boolean {
+   public isUserLoggedIn(): boolean {
       this.loadToken();
 
       //check if not empty
