@@ -121,14 +121,14 @@ public class ExceptionHandling implements ErrorController {
 
     private ResponseEntity<HttpResponse> createHttpResponse(HttpStatus httpStatus, String msg) {
         HttpResponse response = new HttpResponse(httpStatus.value(), httpStatus,
-                httpStatus.getReasonPhrase().toUpperCase(), msg.toUpperCase());
+                httpStatus.getReasonPhrase().toUpperCase(), msg);
         return new ResponseEntity<>(response, httpStatus);
     }
 
     //mapping for custom response replacing whitelabel error page
     @RequestMapping(ERROR_PATH)
     public ResponseEntity<HttpResponse> notFoundResponse() {
-        return createHttpResponse(HttpStatus.NOT_FOUND, "no mapping for this url found");
+        return createHttpResponse(HttpStatus.NOT_FOUND, "No mapping for this url found");
     }
 
     //one of the best methods to disable default whitelabel error page is to implement ErrorController
