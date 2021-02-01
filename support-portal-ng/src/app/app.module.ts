@@ -15,6 +15,7 @@ import { AppComponent } from './app.component';
 import { LoginComponent } from './component/login/login.component';
 import { RegisterComponent } from './component/register/register.component';
 import { UserComponent } from './component/user/user.component';
+import { ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
    declarations: [
@@ -27,7 +28,8 @@ import { UserComponent } from './component/user/user.component';
       BrowserModule,
       AppRoutingModule,
       HttpClientModule,
-      NotificationModule
+      NotificationModule,
+      ReactiveFormsModule
    ],
    providers: [NotificationService, CookieService, AuthenticationService, UserService, AuthenticationGuard,
       { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }], //multi - many instances across many files

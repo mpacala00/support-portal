@@ -18,17 +18,19 @@ export class AuthenticationService {
 
    constructor(private http: HttpClient, private cookies: CookieService) { }
 
-   public login(user: User): Observable<HttpResponse<any> | HttpErrorResponse> {
+   //we need the entire response with headers, because we will retrieve the token from it
+   //HttpErrorResponse will be received by default, it's left here just to show how everything works
+   public login(user: User): Observable<HttpResponse<User | HttpErrorResponse>> {
 
       //post function args: (url, object (body), meta-data (like headers))
       //observe: 'response' will return the entire response with headers etc., without it we would only get body
       return this.http
-         .post<HttpResponse<any> | HttpErrorResponse>(`${this.host}/user/login`, user, { observe: 'response' });
+         .post<User>(`${this.host}/user/login`, user, { observe: 'response' });
    }
 
-   public register(user: User): Observable<HttpResponse<any> | HttpErrorResponse> {
+   public register(user: User): Observable<User> {
       return this.http
-         .post<HttpResponse<any> | HttpErrorResponse>(`${this.host}/user/register`, user, { observe: 'response' });
+         .post<User>(`${this.host}/user/register`, user);
    }
 
    //using cookies for storage of JWT is safer than localStorage
