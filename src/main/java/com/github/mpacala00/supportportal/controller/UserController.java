@@ -110,7 +110,7 @@ public class UserController extends ExceptionHandling {
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
-    @GetMapping("/all}")
+    @GetMapping("/all")
     public ResponseEntity<List<User>> getAllUsers() {
         List<User> users = userService.findAll();
         return new ResponseEntity<>(users, HttpStatus.OK);

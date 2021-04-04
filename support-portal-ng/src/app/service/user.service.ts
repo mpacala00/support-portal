@@ -15,8 +15,8 @@ export class UserService {
 
    constructor(private http: HttpClient, private cookies: CookieService) { }
 
-   public getUser(): Observable<User[] | HttpErrorResponse> {
-      return this.http.get<User[]>(`${this.host}/user/list`);
+   public getUsers(): Observable<User[] | HttpErrorResponse> {
+      return this.http.get<User[]>(`${this.host}/user/all`);
    }
 
    public addUser(formData: FormData): Observable<User | HttpErrorResponse> {

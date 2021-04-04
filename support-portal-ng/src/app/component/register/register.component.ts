@@ -21,8 +21,13 @@ export class RegisterComponent implements OnInit, OnDestroy {
    form: FormGroup;
 
    constructor(private router: Router, private authService: AuthenticationService,
-      private notificationService: NotificationService) {
+      private notificationService: NotificationService) { }
 
+   ngOnDestroy(): void {
+      this.subscriptions.forEach(sub => sub.unsubscribe());
+   }
+
+   ngOnInit(): void {
       if (this.authService.isUserLoggedIn()) { this.router.navigateByUrl('/user/management'); }
 
       this.form = new FormGroup({
@@ -32,13 +37,6 @@ export class RegisterComponent implements OnInit, OnDestroy {
          password: new FormControl(''),
          email: new FormControl('')
       })
-   }
-
-   ngOnDestroy(): void {
-      this.subscriptions.forEach(sub => sub.unsubscribe());
-   }
-
-   ngOnInit(): void {
    }
 
    public onRegister(user: User): void {
@@ -52,7 +50,6 @@ export class RegisterComponent implements OnInit, OnDestroy {
                this.router.navigateByUrl('/login');
             },
             (errorResponse: HttpErrorResponse) => {
-               console.log(errorResponse);
                this.sendNotification(NotificationType.ERROR, errorResponse.error.message);
                this.showLoading = false;
             }
