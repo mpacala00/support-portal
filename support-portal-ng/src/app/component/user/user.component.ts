@@ -34,9 +34,10 @@ export class UserComponent implements OnInit {
    constructor(private userService: UserService, private notificationService: NotificationService) { }
 
    ngOnInit(): void {
-      this.upperForm = new FormGroup({
-         search: new FormControl('')
-      })
+      // simple input is enough for search functionality
+      // this.upperForm = new FormGroup({
+      //    search: new FormControl('')
+      // })
 
       this.newUserForm = new FormGroup({
          firstName: new FormControl(''),
@@ -114,6 +115,24 @@ export class UserComponent implements OnInit {
       this.profileImageFileName = fileName;
       this.profileImage = file;
       console.log(fileName, file);
+   }
+
+   public searchUsers(searchTerm: string): void {
+      const results: User[] = [];
+      console.log(searchTerm);
+      for (let user of this.userService.getUsersFromCache()) {
+         //if indexOf returns anything but -1 it found searchTerm in the string
+         if (user.firstName.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1 ||
+            user.lastName.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1 ||
+            user.username.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1 ||
+            user.userId.toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1) {
+            results.push(user);
+         }
+      }
+      this.users = results;
+      if (results.length == 0 || !searchTerm) {
+         this.users = this.userService.getUsersFromCache();
+      }
    }
 
    private sendNotification(type: NotificationType, message: string) {
