@@ -55,16 +55,20 @@ export class UserService {
       return null;
    }
 
+   //creating formData of user in service to make it look cleaner in the component itself
    public createUserData(loggedInUsername: string, user: User, profileImage: File): FormData {
       const formData = new FormData();
+
+      //loggedInUsername is used for updating current user profile
       formData.append('currentUsername', loggedInUsername);
       formData.append('firstName', user.firstName);
       formData.append('lastName', user.lastName);
       formData.append('username', user.username);
       formData.append('email', user.email);
+      formData.append('role', user.role);
       formData.append('profileImage', profileImage);
-      formData.append('isActive', JSON.stringify(user.active));
-      formData.append('isNotLocked', JSON.stringify(user.notLocked));
+      formData.append('isActive', JSON.stringify(user.isActive));
+      formData.append('isNotLocked', JSON.stringify(user.isActive));
       return formData;
    }
 }

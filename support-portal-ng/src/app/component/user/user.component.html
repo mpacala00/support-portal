@@ -139,16 +139,23 @@
                                     </h6>
                                     <p class="mb-1">{{ selectedUser?.username }}</p>
                                     <div class="">Status:
-                                       <span [hidden]="!selectedUser?.active" class="badge badge-success">Active</span>
-                                       <span [hidden]="selectedUser?.active" class="badge badge-danger">Inactive</span>
+                                       <span [hidden]="selectedUser?.isActive" class="badge badge-success">Active</span>
+                                       <span [hidden]="!selectedUser?.isActive"
+                                          class="badge badge-danger">Inactive</span>
                                     </div>
-                                    <div class="text-muted"><small>Last login: {{ selectedUser?.loginDateDisplay | date:
-                                          'medium' }}</small></div>
+                                    <div class="text-muted">
+                                       <small>
+                                          Last login: {{ selectedUser?.loginDateDisplay | date }}
+                                       </small>
+                                    </div>
                                  </div>
                               </div>
-                              <div class="text-center text-sm-right">
-                                 <div class="text-muted"><small>Joined {{ selectedUser?.joinDate | date:
-                                       'medium' }}</small></div>
+                              <div class="col text-center text-sm-right">
+                                 <div class="text-muted">
+                                    <small>
+                                       Joined {{ selectedUser?.joinDate | date }}
+                                    </small>
+                                 </div>
                               </div>
                            </div>
                         </div>
@@ -172,11 +179,11 @@
                            {{ selectedUser?.loginDateDisplay | date: 'medium' }}
                         </li>
                         <li class="list-group-item">
-                           <span [hidden]="selectedUser?.notLocked">
+                           <span [hidden]="!selectedUser?.isNotLocked">
                               <i class="fa fa-lock float-right" style="color: red"></i>
                               Account locked
                            </span>
-                           <span [hidden]="!selectedUser?.notLocked">
+                           <span [hidden]="selectedUser?.isNotLocked">
                               <i class="fa fa-lock float-right" style="color: green"></i>
                               Account unlocked
                            </span>
@@ -187,4 +194,98 @@
             </div>
          </div>
       </div>
+
+      <!-- new user modal -->
+      <div class="modal draggable fade bd-example-modal-lg" id="addUserModal" tabindex="-1" role="dialog"
+         aria-labelledby="exampleModalCenterTile" aria-hidden="true">
+         <div class="modal-dialog" role="document">
+            <div class="modal-content">
+               <div class="modal-header">
+                  <h5 class="modal-title text-center">New user</h5>
+
+                  <!--close button-->
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                     <span aria-hidden="true">&times;</span>
+                  </button>
+               </div>
+               <div class="modal-body">
+                  <div>
+                     <form [formGroup]="newUserForm" (ngSubmit)="onAddNewUser()">
+                        <div class="form-group">
+                           <label for="firstname">First name</label>
+                           <input type="text" name="firstName" required class="form-control"
+                              formControlName="firstName">
+                        </div>
+
+                        <div class="form-group">
+                           <label for="lastname">Last name</label>
+                           <input type="text" name="lastName" required class="form-control" formControlName="lastName">
+                        </div>
+
+                        <div class="form-group">
+                           <label for="username">Username</label>
+                           <input type="text" name="username" required class="form-control" formControlName="username">
+                        </div>
+
+                        <div class="form-group">
+                           <label for="email">E-mail</label>
+                           <input type="text" name="email" required class="form-control" formControlName="email">
+                        </div>
+
+                        <div class="form-group">
+                           <label for="authority">Role</label>
+                           <select name="role" required class="form-control" formControlName="role">
+                              <option value="ROLE_USER">USER</option>
+                              <option value="ROLE_HR">HR</option>
+                              <option value="ROLE_MANAGER">MANAGER</option>
+                              <option value="ROLE_ADMIN">ADMIN</option>
+                              <option value="ROLE_SUPER_ADMIN">SUPER ADMIN</option>
+                           </select>
+                        </div>
+                        <div class="input-group mb-2">
+                           <div class="input-group-prepend">
+                              <span class="input-group-text">Profile picture</span>
+                           </div>
+                           <div class="custom-file">
+                              <input type="file" name="profileImage" class="custom-file-input"
+                                 (change)="onProfileImageChange($event.target.files[0].name, $event.target.files[0])">
+
+                              <label class="custom-file-label">
+                                 <span [hidden]="!profileImageFileName">{{ profileImageFileName }}</span>
+                                 <span [hidden]="profileImageFileName">Choose file</span>
+                              </label>
+                           </div>
+                        </div>
+                        <fieldset class="form-group">
+                           <div class="form-check">
+                              <label class="form-check-label">
+                                 <input type="checkbox" name="active" class="form-check-input"
+                                    formControlName="isActive">
+                                 Active
+                              </label>
+                           </div>
+                           <div class="form-check disabled">
+                              <label class="form-check-label">
+                                 <input type="checkbox" name="isNotLocked" class="form-check-input"
+                                    formControlName="isNotLocked">
+                                 Unlocked
+                              </label>
+                           </div>
+                        </fieldset>
+
+                        <button type="submit" style="display: none" id="new-user-save"></button>
+                     </form>
+                  </div>
+               </div>
+               <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                     id="new-user-close">Close</button>
+                  <button type="button" [disabled]="newUserForm.invalid" class="btn btn-primary"
+                     (click)="saveNewUser()">Save
+                     changes</button>
+               </div>
+            </div>
+         </div>
+      </div>
+
    </div>
