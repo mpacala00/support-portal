@@ -25,11 +25,14 @@ export class UserComponent implements OnInit {
    //anytime titleSubject changes
    public titleAction$ = this.titleSubject.asObservable();
 
-   upperForm: FormGroup;
    newUserForm: FormGroup;
+   editUserForm: FormGroup;
 
    //displayed users
    public users: User[] = [];
+
+   public editUser = new User();
+   private currentUsername: string;
 
    constructor(private userService: UserService, private notificationService: NotificationService) { }
 
@@ -46,9 +49,20 @@ export class UserComponent implements OnInit {
          email: new FormControl(''),
          role: new FormControl('ROLE_USER'),
          //profileImage is directly put as an arg to a function
+         isActive: new FormControl(false),
          isNotLocked: new FormControl(true),
-         isActive: new FormControl(false)
       })
+
+      //values updated on edit user modal open
+      this.editUserForm = new FormGroup({
+         firstName: new FormControl(''),
+         lastName: new FormControl(''),
+         username: new FormControl(''),
+         email: new FormControl(''),
+         role: new FormControl(''),
+         isNotLocked: new FormControl(false),
+         isActive: new FormControl(false)
+      });
 
       this.getUsers(true);
    }
@@ -75,6 +89,10 @@ export class UserComponent implements OnInit {
       );
    }
 
+   public test(test) {
+      console.log(test);
+   }
+
    //new user post
    public onAddNewUser(): void {
       const formData = this.userService.createUserData(null, this.newUserForm.value, this.profileImage);
@@ -94,7 +112,35 @@ export class UserComponent implements OnInit {
             this.profileImageFileName = null;
          }
       ));
+   }
 
+   //my own implementation of editUserForm using reactive forms since author of the course
+   //used ngModel
+   public onUpdateUser(): void {
+      const formData = this.userService.createUserData(this.currentUsername, this.editUserForm.value, this.profileImage);
+      this.subscriptions.push(this.userService.updateUser(formData).subscribe(
+         (res: User) => {
+            this.clickButton('closeEditUserModalButton'); //close modal
+            this.getUsers(false); //refresh users without showing notification
+            this.profileImage = null;
+            this.profileImageFileName = null;
+            this.sendNotification(NotificationType.SUCCESS, `${res.firstName} ${res.lastName} updated successfuly.`);
+         },
+         (err: HttpErrorResponse) => {
+            this.sendNotification(NotificationType.ERROR, err.error.message);
+            this.profileImage = null;
+            this.profileImageFileName = null;
+         }
+      ));
+   }
+
+   public onEditUser(user: User): void {
+      this.editUser = user;
+      this.currentUsername = user.username;
+      //patch editUserForm values since it starts as a blank form
+      this.editUserForm.patchValue(this.editUser);
+
+      this.clickButton('openUserEdit');
    }
 
    public saveNewUser(): void {

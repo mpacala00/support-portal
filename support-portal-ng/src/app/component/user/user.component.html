@@ -73,25 +73,25 @@
             </thead>
 
             <tbody *ngFor="let u of users">
-               <tr class="text-center" (click)="onSelectUser(u)">
-                  <td>
+               <tr class="text-center">
+                  <td (click)="onSelectUser(u)">
                      <!-- using '?' in src means it is optional value -->
                      <img class="rounded-circle img-fluid img-thumbnail" height="40" width="40"
                         src="{{u?.profileImageUrl}}" alt="User picture">
 
                   </td>
-                  <td>{{ u?.id }}</td>
-                  <td>{{ u?.firstName }}</td>
-                  <td>{{ u?.lastName }}</td>
-                  <td>{{ u?.username }}</td>
-                  <td>{{ u?.email }}</td>
-                  <td>
-                     <span [hidden]="!u.active" class="badge badge-success">Active</span>
-                     <span [hidden]="u.active" class="badge badge-danger">Inactive</span>
+                  <td (click)="onSelectUser(u)">{{ u?.id }}</td>
+                  <td (click)="onSelectUser(u)">{{ u?.firstName }}</td>
+                  <td (click)="onSelectUser(u)">{{ u?.lastName }}</td>
+                  <td (click)="onSelectUser(u)">{{ u?.username }}</td>
+                  <td (click)="onSelectUser(u)">{{ u?.email }}</td>
+                  <td (click)="onSelectUser(u)">
+                     <span [hidden]="!u.isActive" class="badge badge-success">Active</span>
+                     <span [hidden]="u.isActive" class="badge badge-danger">Inactive</span>
                   </td>
                   <td>
                      <div class="btn-group">
-                        <button class="btn btn-outline-info">
+                        <button class="btn btn-outline-info" (click)="onEditUser(u)">
                            <i class="fas fa-edit"></i>
                         </button>
                         <button class="btn btn-outline-danger">
@@ -140,8 +140,9 @@
                                     </h6>
                                     <p class="mb-1">{{ selectedUser?.username }}</p>
                                     <div class="">Status:
-                                       <span [hidden]="selectedUser?.isActive" class="badge badge-success">Active</span>
                                        <span [hidden]="!selectedUser?.isActive"
+                                          class="badge badge-success">Active</span>
+                                       <span [hidden]="selectedUser?.isActive"
                                           class="badge badge-danger">Inactive</span>
                                     </div>
                                     <div class="text-muted">
@@ -181,12 +182,12 @@
                         </li>
                         <li class="list-group-item">
                            <span [hidden]="!selectedUser?.isNotLocked">
-                              <i class="fa fa-lock float-right" style="color: red"></i>
-                              Account locked
-                           </span>
-                           <span [hidden]="selectedUser?.isNotLocked">
                               <i class="fa fa-lock float-right" style="color: green"></i>
                               Account unlocked
+                           </span>
+                           <span [hidden]="selectedUser?.isNotLocked">
+                              <i class="fa fa-lock float-right" style="color: red"></i>
+                              Account locked
                            </span>
                         </li>
                      </ul>
@@ -260,7 +261,7 @@
                         <fieldset class="form-group">
                            <div class="form-check">
                               <label class="form-check-label">
-                                 <input type="checkbox" name="active" class="form-check-input"
+                                 <input type="checkbox" name="isActive" class="form-check-input"
                                     formControlName="isActive">
                                  Active
                               </label>
@@ -284,6 +285,99 @@
                   <button type="button" [disabled]="newUserForm.invalid" class="btn btn-primary"
                      (click)="saveNewUser()">Save
                      changes</button>
+               </div>
+            </div>
+         </div>
+      </div>
+
+      <!-- modal edit user info -->
+      <div class="modal draggable fade bd-example-modal-lg" id="editUserModal" tabindex="-1" role="dialog"
+         aria-labelledby="" aria-hidden="true">
+         <div class="modal-dialog" role="document">
+            <div class="modal-content">
+               <div class="modal-header">
+                  <h5 class="modal-title text-center" id="exampleModalLongTitle">
+                     Edit {{ editUser?.firstName }}&nbsp;{{ editUser?.lastName}}</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                     <span aria-hidden="true">&times;</span>
+                  </button>
+               </div>
+               <div class="modal-body">
+                  <div>
+                     <form [formGroup]="editUserForm">
+                        <div class="form-group">
+                           <label for="firstname">First name</label>
+                           <input type="text" name="firstName" required class="form-control"
+                              [value]="editUser.firstName" formControlName="firstName">
+                        </div>
+
+                        <div class="form-group">
+                           <label for="lastname">Last name</label>
+                           <input type="text" name="lastName" required class="form-control" formControlName="lastName"
+                              [value]="editUser.lastName">
+                        </div>
+
+                        <div class="form-group">
+                           <label for="username">Username</label>
+                           <input type="text" name="username" required class="form-control" formControlName="username"
+                              [value]="editUser.username">
+                        </div>
+
+                        <div class="form-group">
+                           <label for="email">E-mail</label>
+                           <input type="text" name="email" required class="form-control" formControlName="email"
+                              [value]="editUser.email">
+                        </div>
+
+                        <div class="form-group">
+                           <label for="authority">Role</label>
+                           <select name="role" required class="form-control" formControlName="role"
+                              [value]="editUser.role">
+                              <option value="ROLE_USER">USER</option>
+                              <option value="ROLE_HR">HR</option>
+                              <option value="ROLE_MANAGER">MANAGER</option>
+                              <option value="ROLE_ADMIN">ADMIN</option>
+                              <option value="ROLE_SUPER_ADMIN">SUPER ADMIN</option>
+                           </select>
+                        </div>
+                        <div class="input-group mb-2">
+                           <div class="input-group-prepend">
+                              <span class="input-group-text">Profile picture</span>
+                           </div>
+                           <div class="custom-file">
+                              <input type="file" name="profileImage" class="custom-file-input"
+                                 (change)="onProfileImageChange($event.target.files[0].name, $event.target.files[0])">
+
+                              <label class="custom-file-label">
+                                 <span [hidden]="!profileImageFileName">{{ profileImageFileName }}</span>
+                                 <span [hidden]="profileImageFileName">Choose file</span>
+                              </label>
+                           </div>
+                        </div>
+                        <fieldset class="form-group">
+                           <div class="form-check">
+                              <label class="form-check-label">
+                                 <input type="checkbox" name="isActive" class="form-check-input"
+                                    formControlName="isActive" [value]="editUser.isActive">
+                                 Active
+                              </label>
+                           </div>
+                           <div class="form-check disabled">
+                              <label class="form-check-label">
+                                 <input type="checkbox" name="isNotLocked" class="form-check-input"
+                                    formControlName="isNotLocked" [value]="editUser.isNotLocked">
+                                 Unlocked
+                              </label>
+                           </div>
+                        </fieldset>
+                     </form>
+                  </div>
+               </div>
+               <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal" id="closeEditUserModalButton"
+                     (click)="test(editUserForm.value)">Close</button>
+                  <button type="button" class="btn btn-primary" (click)="onUpdateUser()"
+                     [disabled]="editUserForm.invalid">Save changes</button>
                </div>
             </div>
          </div>

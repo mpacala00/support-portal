@@ -1,5 +1,6 @@
 package com.github.mpacala00.supportportal.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -37,6 +38,10 @@ public class User implements Serializable {
     private String role; //ROLE_USER, ROLE_ADMIN etc
     private String[] authoritites; //delete, read, update etc
 
+    //for some painful reason isActive was being serialized to 'active', but with these
+    //annotations everything works fine
+    @JsonProperty(value = "isActive")
     private boolean isActive; //activate acc after email confirmation
+    @JsonProperty(value = "isNotLocked")
     private boolean isNotLocked; //for blocking accounts functionality
 }
