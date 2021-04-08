@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { NotificationType } from 'src/app/enum/notification-type.enum';
+import { CustomHttpResponse } from 'src/app/model/custom-http-response';
 import { User } from 'src/app/model/user';
 import { NotificationService } from 'src/app/service/notification.service';
 import { UserService } from 'src/app/service/user.service';
@@ -132,6 +133,18 @@ export class UserComponent implements OnInit {
             this.profileImageFileName = null;
          }
       ));
+   }
+
+   public onDeleteUser(id: number): void {
+      this.subscriptions.push(this.userService.deleteUser(id).subscribe(
+         (res: CustomHttpResponse) => {
+            this.sendNotification(NotificationType.INFO, res.message);
+            this.getUsers(true);
+         },
+         (err: HttpErrorResponse) => {
+            this.sendNotification(NotificationType.ERROR, err.error.message);
+         }
+      ))
    }
 
    public onEditUser(user: User): void {
