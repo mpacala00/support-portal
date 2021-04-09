@@ -17,7 +17,7 @@ spring:
     username: support_portal_user
     password: password12
   jpa:
-    show-sql: true
+    show-sql: false # log hibernate to console
     hibernate:
       ddl-auto: update #create - update
     properties:

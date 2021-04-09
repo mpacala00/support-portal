@@ -28,6 +28,7 @@ export class UserComponent implements OnInit {
 
    newUserForm: FormGroup;
    editUserForm: FormGroup;
+   emailForm: FormGroup;
 
    //displayed users
    public users: User[] = [];
@@ -64,6 +65,10 @@ export class UserComponent implements OnInit {
          isNotLocked: new FormControl(false),
          isActive: new FormControl(false)
       });
+
+      this.emailForm = new FormGroup({
+         email: new FormControl('')
+      })
 
       this.getUsers(true);
    }
@@ -145,6 +150,26 @@ export class UserComponent implements OnInit {
             this.sendNotification(NotificationType.ERROR, err.error.message);
          }
       ))
+   }
+
+   public onResetPassword(emailForm: FormGroup): void {
+      this.refreshing = true;
+      const emailAddress = emailForm.value['email'];
+
+      this.subscriptions.push(
+         this.userService.resetPassword(emailAddress).subscribe(
+            (res: CustomHttpResponse) => {
+               this.refreshing = false;
+               this.sendNotification(NotificationType.SUCCESS, res.message);
+            },
+            (err: HttpErrorResponse) => {
+               this.refreshing = false;
+               this.sendNotification(NotificationType.WARNING, err.error.message);
+            },
+            // exceture on complete: whether or not the call was successful
+            () => emailForm.reset()
+         )
+      )
    }
 
    public onEditUser(user: User): void {

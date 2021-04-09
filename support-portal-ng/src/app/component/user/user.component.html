@@ -18,17 +18,19 @@
    <nav class="navbar navbar-expand-md breadcrumb">
       <div class="collapse navbar-collapse" id="navbarCollapse">
          <div class="nav nav-pills">
-            <a class="nav-item nav-link active ml-1" data-toggle="tab" href="" (click)="changeTitle('Users')">
+            <a class="nav-item nav-link active ml-1" data-toggle="tab" href="#users" (click)="changeTitle('Users')">
                <i class="fa fa-users"></i>
                Users
             </a>
 
-            <a class="nav-item nav-link ml-4" data-toggle="tab" href="" (click)="changeTitle('Settings')">
+            <a class="nav-item nav-link ml-4" data-toggle="tab" href="#reset-password"
+               (click)="changeTitle('Settings')">
                <i class="fa fa-cogs"></i>
                Settings
             </a>
 
-            <a class="nav-item nav-link mr-3 move-right" data-toggle="tab" href="" (click)="changeTitle('Profile')">
+            <a class="nav-item nav-link mr-3 move-right" data-toggle="tab" href="#profile"
+               (click)="changeTitle('Profile')">
                Welcome,
                <i class="fa fa-user"></i>
             </a>
@@ -107,6 +109,26 @@
 
       <button [hidden]="true" type="button" id="openUserInfo" data-toggle="modal" data-target="#viewUserModal"></button>
       <button [hidden]="true" type="button" id="openUserEdit" data-toggle="modal" data-target="#editUserModal"></button>
+
+      <!-- change password -->
+      <div class="tab-pane fade" id="reset-password">
+         <form [formGroup]="emailForm" (ngSubmit)="onResetPassword(emailForm)">
+            <fieldset>
+               <legend>User password managmenet</legend>
+               <div class="form-group">
+                  <label for="email">E-mail address</label>
+                  <input type="email" name="email" required formControlName="email" class="form-control"
+                     placeholder="Enter e-mail (example@mail.com)">
+                  <small class="form-text text-muted">We'll never share your email with anyone else.</small>
+               </div>
+               <button type="submit" [disabled]="false" class="btn btn-primary">
+                  <i *ngIf="refreshing" class="fas fa-spinner fa-spin"></i>&nbsp;
+                  <span *ngIf="refreshing">Loading...</span>
+                  <span *ngIf="!refreshing">Reset password</span>
+               </button>
+            </fieldset>
+         </form>
+      </div>
 
       <!-- modal user info -->
       <div class="modal fade bd-example-modal-lg" id="viewUserModal" tabindex="-1" role="dialog" aria-labelledby=""
