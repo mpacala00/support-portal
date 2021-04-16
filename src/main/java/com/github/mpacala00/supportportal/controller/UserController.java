@@ -79,7 +79,7 @@ public class UserController extends ExceptionHandling {
                                            @RequestParam("isActive") String isActive,
                                            @RequestParam("isNotLocked") String isNotLocked,
                                            @RequestParam(value = "profileImage", required = false) MultipartFile profileImage)
-            throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException {
+            throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException, WrongFileTypeException {
         User newUser = userService.addNewUser(firstName, lastName, username, email, role,
                 Boolean.parseBoolean(isNotLocked), Boolean.parseBoolean(isActive), profileImage);
 
@@ -96,7 +96,7 @@ public class UserController extends ExceptionHandling {
                                            @RequestParam("isActive") String isActive,
                                            @RequestParam("isNotLocked") String isNotLocked,
                                            @RequestParam(value = "profileImage", required = false) MultipartFile profileImage)
-            throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException {
+            throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException, WrongFileTypeException {
         User updatedUser = userService.updateUser(currentUsername, firstName, lastName, username, email, role,
                 Boolean.parseBoolean(isNotLocked), Boolean.parseBoolean(isActive), profileImage);
 
@@ -126,7 +126,7 @@ public class UserController extends ExceptionHandling {
     @DeleteMapping("/delete/{username}")
     @PreAuthorize("hasAnyAuthority('user:delete')")
 //    @PreAuthorize("hasRole('ROLE_SUPER_ADMIN')")
-    public ResponseEntity<HttpResponse> deleteUser(@PathVariable("username") String username) {
+    public ResponseEntity<HttpResponse> deleteUser(@PathVariable("username") String username) throws IOException {
         userService.deleteUser(username);
         return response("User " + username + " successfully deleted", HttpStatus.OK);
     }
@@ -134,7 +134,7 @@ public class UserController extends ExceptionHandling {
     @PostMapping("/update-profile-image")
     public ResponseEntity<User> updateProfileImage(@RequestParam("username") String username,
                                                    @RequestParam("profileImage") MultipartFile profileImage)
-            throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException {
+            throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException, WrongFileTypeException {
         User user = userService.updateProfileImage(username, profileImage);
         return new ResponseEntity<>(user, HttpStatus.OK);
     }

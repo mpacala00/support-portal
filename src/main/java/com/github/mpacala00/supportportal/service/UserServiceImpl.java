@@ -101,7 +101,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public User addNewUser(String firstName, String lastName, String username, String email, String role,
                            boolean isNotLocked, boolean isActive, MultipartFile profileImage)
-            throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException {
+            throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException, WrongFileTypeException {
 
         validateUsernameAndEmail(StringUtils.EMPTY, username, email);
 
@@ -127,7 +127,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public User updateUser(String currentUsername, String newFirstName, String newLastName, String newUsername,
                            String newEmail, String role, boolean isNotLocked, boolean isActive, MultipartFile profileImage)
-            throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException {
+            throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException, WrongFileTypeException {
 
         User currentUser = validateUsernameAndEmail(currentUsername, newUsername, newEmail);
         //dont check if currentUser is null, exception will be thrown in such case
@@ -168,7 +168,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public User updateProfileImage(String username, MultipartFile newProfileImage)
-            throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException {
+            throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException, WrongFileTypeException {
         User user = validateUsernameAndEmail(username, null, null);
         saveProfileImage(user, newProfileImage);
         return user;
