@@ -20,12 +20,15 @@ public class User implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(nullable = false, updatable = false)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY) //hide sensitive info
     private Long id; //id for database
     private String userId; //id for display
 
     private String firstName;
     private String lastName;
     private String username;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
     private String email; //for signing-up or renewing password
     private String profileImageUrl;
