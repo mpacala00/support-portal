@@ -1,10 +1,7 @@
 package com.github.mpacala00.supportportal.service;
 
 import com.github.mpacala00.supportportal.domain.User;
-import com.github.mpacala00.supportportal.exception.domain.EmailExistsException;
-import com.github.mpacala00.supportportal.exception.domain.EmailNotFoundException;
-import com.github.mpacala00.supportportal.exception.domain.UserNotFoundException;
-import com.github.mpacala00.supportportal.exception.domain.UsernameExistsException;
+import com.github.mpacala00.supportportal.exception.domain.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.mail.MessagingException;
@@ -24,14 +21,14 @@ public interface UserService {
 
     //for adding user as a super admin, for example
     User addNewUser(String firstName, String lastName, String username, String email, String role, boolean isNotLocked,
-                    boolean isActive, MultipartFile profileImage) throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException;
+                    boolean isActive, MultipartFile profileImage) throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException, WrongFileTypeException;
 
     //we need to know existing username to update its account, could also be done with user's id or just with
     //one method in interface and 2 implementations of it in the actual service
     User updateUser(String currentUsername, String newFirstName, String newLastName, String newUsername, String newEmail,
-                    String role, boolean isNotLocked, boolean isActive, MultipartFile profileImage) throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException;
+                    String role, boolean isNotLocked, boolean isActive, MultipartFile profileImage) throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException, WrongFileTypeException;
 
     void resetPassword(String email) throws EmailNotFoundException, MessagingException;
 
-    User updateProfileImage(String username, MultipartFile newProfileImage) throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException;
+    User updateProfileImage(String username, MultipartFile newProfileImage) throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException, WrongFileTypeException;
 }
