@@ -123,12 +123,12 @@ public class UserController extends ExceptionHandling {
         return response(EMAIL_SENT + email, HttpStatus.OK);
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/delete/{username}")
     @PreAuthorize("hasAnyAuthority('user:delete')")
 //    @PreAuthorize("hasRole('ROLE_SUPER_ADMIN')")
-    public ResponseEntity<HttpResponse> deleteUser(@PathVariable("id") String id) {
-        userService.deleteUser(Long.valueOf(id));
-        return response("User of id " + id + " successfully deleted", HttpStatus.OK);
+    public ResponseEntity<HttpResponse> deleteUser(@PathVariable("username") String username) {
+        userService.deleteUser(username);
+        return response("User " + username + " successfully deleted", HttpStatus.OK);
     }
 
     @PostMapping("/update-profile-image")

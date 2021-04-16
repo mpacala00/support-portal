@@ -205,8 +205,8 @@ export class UserComponent implements OnInit {
       ));
    }
 
-   public onDeleteUser(id: number): void {
-      this.subscriptions.push(this.userService.deleteUser(id).subscribe(
+   public onDeleteUser(username: string): void {
+      this.subscriptions.push(this.userService.deleteUser(username).subscribe(
          (res: CustomHttpResponse) => {
             this.sendNotification(NotificationType.INFO, res.message);
             this.getUsers(true);

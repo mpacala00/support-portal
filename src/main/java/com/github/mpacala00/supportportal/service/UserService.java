@@ -20,7 +20,7 @@ public interface UserService {
 
     List<User> findAll();
 
-    void deleteUser(Long id);
+    void deleteUser(String username) throws IOException;
 
     //for adding user as a super admin, for example
     User addNewUser(String firstName, String lastName, String username, String email, String role, boolean isNotLocked,
