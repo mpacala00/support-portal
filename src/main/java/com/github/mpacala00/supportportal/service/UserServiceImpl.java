@@ -3,10 +3,7 @@ package com.github.mpacala00.supportportal.service;
 import com.github.mpacala00.supportportal.domain.User;
 import com.github.mpacala00.supportportal.domain.UserPrincipal;
 import com.github.mpacala00.supportportal.enumeration.Role;
-import com.github.mpacala00.supportportal.exception.domain.EmailExistsException;
-import com.github.mpacala00.supportportal.exception.domain.EmailNotFoundException;
-import com.github.mpacala00.supportportal.exception.domain.UserNotFoundException;
-import com.github.mpacala00.supportportal.exception.domain.UsernameExistsException;
+import com.github.mpacala00.supportportal.exception.domain.*;
 import com.github.mpacala00.supportportal.repository.UserRepository;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -15,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -31,11 +29,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.github.mpacala00.supportportal.constant.FileConstant.*;
 import static com.github.mpacala00.supportportal.constant.UserImplConstant.*;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static org.springframework.http.MediaType.IMAGE_GIF_VALUE;
+import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
 
 //@Slf4j can be used instead of the way that was used below
 @Service
@@ -207,8 +208,13 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     //this method needs to be well optimized, accessing file systems are time consuming
-    private void saveProfileImage(User user, MultipartFile profileImage) throws IOException {
+    private void saveProfileImage(User user, MultipartFile profileImage) throws IOException, WrongFileTypeException {
         if(profileImage != null) {
+            if(!Arrays.asList(MediaType.IMAGE_JPEG_VALUE, IMAGE_PNG_VALUE, IMAGE_GIF_VALUE)
+                    .contains(profileImage.getContentType())) {
+                throw new WrongFileTypeException(profileImage.getOriginalFilename()
+                        + " is not an image file. Please select an image");
+            }
             Path userFolder = Paths.get(USER_FOLDER + user.getUsername()).toAbsolutePath().normalize();
             if(!Files.exists(userFolder)) {
                 Files.createDirectories(userFolder);

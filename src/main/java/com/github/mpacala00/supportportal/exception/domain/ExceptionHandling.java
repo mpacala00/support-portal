@@ -119,6 +119,12 @@ public class ExceptionHandling implements ErrorController {
         return createHttpResponse(HttpStatus.INTERNAL_SERVER_ERROR, ERROR_PROCESSING_FILE);
     }
 
+    @ExceptionHandler(WrongFileTypeException.class)
+    public ResponseEntity<HttpResponse> wrongFileType(WrongFileTypeException e) {
+        log.error(e.getMessage());
+        return createHttpResponse(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+
     private ResponseEntity<HttpResponse> createHttpResponse(HttpStatus httpStatus, String msg) {
         HttpResponse response = new HttpResponse(httpStatus.value(), httpStatus,
                 httpStatus.getReasonPhrase().toUpperCase(), msg);

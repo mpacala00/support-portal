@@ -160,7 +160,7 @@
                               </button>
                               <input type="file" style="display: none;" (change)="onProfileImageChange($event.target.files[0].name,
                                     $event.target.files[0]); onUpdateProfileImage()" name="profile-image-input"
-                                 id="profile-image-input" placeholder="file" accept="*">
+                                 id="profile-image-input" placeholder="file" accept="image/*">
                            </div>
                            <div class="col-3">
                               <p>Joined {{ loggedInUser?.joinDate | date }}</p>
@@ -393,7 +393,7 @@
                               <span class="input-group-text">Profile picture</span>
                            </div>
                            <div class="custom-file">
-                              <input type="file" name="profileImage" class="custom-file-input"
+                              <input type="file" name="profileImage" class="custom-file-input" accept="image/*"
                                  (change)="onProfileImageChange($event.target.files[0].name, $event.target.files[0])">
 
                               <label class="custom-file-label">
@@ -489,7 +489,7 @@
                               <span class="input-group-text">Profile picture</span>
                            </div>
                            <div class="custom-file">
-                              <input type="file" name="profileImage" class="custom-file-input"
+                              <input type="file" name="profileImage" class="custom-file-input" accept="image/*"
                                  (change)="onProfileImageChange($event.target.files[0].name, $event.target.files[0])">
 
                               <label class="custom-file-label">
