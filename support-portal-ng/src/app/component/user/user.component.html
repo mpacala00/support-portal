@@ -29,9 +29,8 @@
                Settings
             </a>
 
-            <a class="nav-item nav-link mr-3 move-right" data-toggle="tab" href="#profile"
-               (click)="changeTitle('Profile')">
-               Welcome,
+            <a class="nav-item nav-link mr-3 move-right" data-toggle="tab" href="#profile" (click)="onProfileEnter()">
+               Welcome,&nbsp;{{loggedInUser?.firstName}}
                <i class="fa fa-user"></i>
             </a>
          </div>
@@ -128,6 +127,129 @@
                </button>
             </fieldset>
          </form>
+      </div>
+
+      <div class="tab-pane pt-3" id="profile" aria-hidden="true" tabindex="-1" role="dialog" aria-labelledby="">
+         <div class="container-fluid">
+            <div class="row justify-content-center">
+               <div class="col-8 p-0">
+                  <div class="card">
+                     <div class="card-body">
+                        <div class="row">
+                           <div class="col-3">
+                              <img src="{{loggedInUser?.profileImageUrl}}" class="img-fluid rounded border" width="150"
+                                 height="150">
+
+                              <!--progress bar image upload-->
+                              <div class="progress mt-1" *ngIf="fileStatus?.status === 'progress'">
+                                 <div class="progress-bar bg-info" [style.width.%]="fileStatus?.percentage"
+                                    role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                    {{ fileStatus?.percentage }}&nbsp;%
+                                 </div>
+                              </div>
+                           </div>
+
+                           <div class="col-6">
+                              <h3>{{ loggedInUser?.firstName }}&nbsp;{{ loggedInUser?.lastName }}</h3>
+                              <p>{{ loggedInUser?.username }}</p>
+                              <small>Last login: {{ loggedInUser?.loginDateDisplay }}</small><br />
+
+                              <button (click)="updateProfileImage()" class="btn btn-primary">
+                                 <i class="fa fa-fw fa-camera"></i>
+                                 <span>&nbsp;Change photo</span>
+                              </button>
+                              <input type="file" style="display: none;" (change)="onProfileImageChange($event.target.files[0].name,
+                                    $event.target.files[0]); onUpdateProfileImage()" name="profile-image-input"
+                                 id="profile-image-input" placeholder="file" accept="*">
+                           </div>
+                           <div class="col-3">
+                              <p>Joined {{ loggedInUser?.joinDate | date }}</p>
+                           </div>
+                        </div>
+
+                        <form [formGroup]="profileUserForm" (ngSubmit)="onUpdateCurrentUser(profileUserForm.value)">
+                           <div class="row mt-5">
+                              <div class="col">
+                                 <div class="form-group">
+                                    <label for="firstname">First name</label>
+                                    <input type="text" name="firstName" required class="form-control"
+                                       [value]="editUser.firstName" formControlName="firstName">
+                                 </div>
+                              </div>
+                              <div class="col">
+                                 <div class="form-group">
+                                    <label for="lastname">Last name</label>
+                                    <input type="text" name="lastName" required class="form-control"
+                                       formControlName="lastName" [value]="editUser.lastName">
+                                 </div>
+                              </div>
+                           </div>
+
+                           <div class="form-group">
+                              <label for="username">Username</label>
+                              <input type="text" name="username" required class="form-control"
+                                 formControlName="username" [value]="editUser.username">
+                           </div>
+
+                           <div class="form-group">
+                              <label for="email">E-mail</label>
+                              <input type="text" name="email" required class="form-control" formControlName="email"
+                                 [value]="editUser.email">
+                           </div>
+
+                           <div class="form-group">
+                              <label for="authority">Role</label>
+                              <select name="role" required class="form-control" formControlName="role"
+                                 [value]="editUser.role">
+                                 <option value="ROLE_USER">USER</option>
+                                 <option value="ROLE_HR">HR</option>
+                                 <option value="ROLE_MANAGER">MANAGER</option>
+                                 <option value="ROLE_ADMIN">ADMIN</option>
+                                 <option value="ROLE_SUPER_ADMIN">SUPER ADMIN</option>
+                              </select>
+                           </div>
+                           <fieldset class="form-group">
+                              <h6>Account settings</h6>
+                              <div class="form-check">
+                                 <label class="form-check-label">
+                                    <input type="checkbox" name="isActive" class="form-check-input"
+                                       formControlName="isActive" [value]="editUser.isActive">
+                                    Active
+                                 </label>
+                              </div>
+                              <div class="form-check disabled">
+                                 <label class="form-check-label">
+                                    <input type="checkbox" name="isNotLocked" class="form-check-input"
+                                       formControlName="isNotLocked" [value]="editUser.isNotLocked">
+                                    Unlocked
+                                 </label>
+                              </div>
+                           </fieldset>
+                           <button class="btn btn-primary" type="submit">Save changes</button>
+                        </form>
+                     </div>
+                  </div>
+
+               </div>
+               <div class="col-3 p-0">
+                  <div class="card ml-3">
+                     <div class="card-body">
+                        <button class="btn btn-block btn-secondary" (click)="onLogOut()">
+                           Logout
+                        </button>
+                     </div>
+                  </div>
+
+                  <div class="card ml-3 mt-3">
+                     <div class="card-body">
+                        <h6>Permissions from role:</h6>
+                     </div>
+                  </div>
+
+               </div>
+            </div>
+         </div>
+
       </div>
 
       <!-- modal user info -->
@@ -396,8 +518,8 @@
                   </div>
                </div>
                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-dismiss="modal" id="closeEditUserModalButton"
-                     (click)="test(editUserForm.value)">Close</button>
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                     id="closeEditUserModalButton">Close</button>
                   <button type="button" class="btn btn-primary" (click)="onUpdateUser()"
                      [disabled]="editUserForm.invalid">Save changes</button>
                </div>

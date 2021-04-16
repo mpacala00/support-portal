@@ -36,7 +36,7 @@ public class User implements Serializable {
 
     //splitting authorization into roles and authorities makes the system more modular
     private String role; //ROLE_USER, ROLE_ADMIN etc
-    private String[] authoritites; //delete, read, update etc
+    private String[] authorities; //delete, read, update etc
 
     //for some painful reason isActive was being serialized to 'active', but with these
     //annotations everything works fine

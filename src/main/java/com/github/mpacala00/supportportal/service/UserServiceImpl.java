@@ -111,7 +111,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 .email(email)
                 .password(encodePassword(password))
                 .role(getRoleEnumName(role).name())
-                .authoritites(getRoleEnumName(role).getAuthorities())
+                .authorities(getRoleEnumName(role).getAuthorities())
                 .profileImageUrl(getTempImageUrl(username))
                 .isNotLocked(isNotLocked)
                 .isActive(isActive)
@@ -133,7 +133,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         currentUser.setUsername(newUsername);
         currentUser.setEmail(newEmail);
         currentUser.setRole(getRoleEnumName(role).name());
-        currentUser.setAuthoritites(getRoleEnumName(role).getAuthorities());
+        currentUser.setAuthorities(getRoleEnumName(role).getAuthorities());
         currentUser.setNotLocked(isNotLocked);
         currentUser.setActive(isActive);
 
@@ -177,7 +177,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         String password = generatePassword();
         User user = User.builder().userId(generateUserId()).firstName(firstName).lastName(lastName).username(username)
                 .email(email).joinDate(LocalDate.now()).password(encodePassword(password)).isActive(true)
-                .isNotLocked(true).role(Role.ROLE_USER.name()).authoritites(Role.ROLE_USER.getAuthorities())
+                .isNotLocked(true).role(Role.ROLE_USER.name()).authorities(Role.ROLE_USER.getAuthorities())
                 .profileImageUrl(getTempImageUrl(username)).build();
 
         userRepository.save(user);

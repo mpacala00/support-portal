@@ -1,10 +1,13 @@
-import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
+import { HttpErrorResponse, HttpEvent, HttpEventType, HttpResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
+import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { NotificationType } from 'src/app/enum/notification-type.enum';
 import { CustomHttpResponse } from 'src/app/model/custom-http-response';
 import { User } from 'src/app/model/user';
+import { FileUploadStatus } from 'src/app/model/file-upload.status';
+import { AuthenticationService } from 'src/app/service/authentication.service';
 import { NotificationService } from 'src/app/service/notification.service';
 import { UserService } from 'src/app/service/user.service';
 
@@ -21,6 +24,7 @@ export class UserComponent implements OnInit {
    public selectedUser: User;
    public profileImageFileName: string;
    public profileImage: File; //for updating profile pic
+   public fileStatus = new FileUploadStatus();
 
    private titleSubject = new BehaviorSubject<string>('Users');
    //anytime titleSubject changes
@@ -29,20 +33,25 @@ export class UserComponent implements OnInit {
    newUserForm: FormGroup;
    editUserForm: FormGroup;
    emailForm: FormGroup;
+   profileUserForm: FormGroup;
 
    //displayed users
    public users: User[] = [];
 
+   public loggedInUser: User;
+
    public editUser = new User();
    private currentUsername: string;
 
-   constructor(private userService: UserService, private notificationService: NotificationService) { }
+   constructor(private userService: UserService, private notificationService: NotificationService,
+      private authService: AuthenticationService, private router: Router) { }
 
    ngOnInit(): void {
       // simple input is enough for search functionality
       // this.upperForm = new FormGroup({
       //    search: new FormControl('')
       // })
+      this.loggedInUser = this.authService.getUserFromLocalCache();
 
       this.newUserForm = new FormGroup({
          firstName: new FormControl(''),
@@ -70,6 +79,16 @@ export class UserComponent implements OnInit {
          email: new FormControl('')
       })
 
+      this.profileUserForm = new FormGroup({
+         firstName: new FormControl(''),
+         lastName: new FormControl(''),
+         username: new FormControl(''),
+         email: new FormControl(''),
+         role: new FormControl(''),
+         isNotLocked: new FormControl(false),
+         isActive: new FormControl(false)
+      })
+
       this.getUsers(true);
    }
 
@@ -95,8 +114,53 @@ export class UserComponent implements OnInit {
       );
    }
 
-   public test(test) {
-      console.log(test);
+   public updateProfileImage(): void {
+      this.clickButton('profile-image-input');
+   }
+
+   public onUpdateProfileImage(): void {
+      const formData = new FormData();
+      formData.append('username', this.loggedInUser.username);
+      formData.append('profileImage', this.profileImage);
+
+      this.subscriptions.push(this.userService.updateProfileImage(formData).subscribe(
+         (event: HttpEvent<any>) => {
+            this.reportUploadProgress(event);
+         },
+         (err: HttpErrorResponse) => {
+            this.sendNotification(NotificationType.ERROR, err.error.message);
+            this.profileImage = null;
+            this.profileImageFileName = null;
+         }
+      ));
+   }
+
+   private reportUploadProgress(event: HttpEvent<any>): void {
+      switch (event.type) {
+         case HttpEventType.UploadProgress:
+            this.fileStatus.percentage = Math.round((100 * event.loaded / event.total));
+            this.fileStatus.status = 'progress';
+            break;
+
+         case HttpEventType.Response:
+            if (event.status === 200) {
+               this.loggedInUser.profileImageUrl = `${event.body.profileImageUrl}?time=${new Date().getTime()}`;
+               this.sendNotification(NotificationType.SUCCESS, `Your profile image has been updated`);
+               this.fileStatus.status = 'done';
+               break;
+            } else {
+               this.sendNotification(NotificationType.ERROR, `Unable to upload image. Please try again`);
+               break;
+            }
+         default:
+            'Finished all processes';
+      }
+   }
+
+   public onLogOut(): void {
+      this.authService.logout();
+      this.router.navigate(['/login']);
+      this.sendNotification(NotificationType.SUCCESS, `You've been successfully logged out`);
    }
 
    //new user post
@@ -134,6 +198,7 @@ export class UserComponent implements OnInit {
          },
          (err: HttpErrorResponse) => {
             this.sendNotification(NotificationType.ERROR, err.error.message);
+            this.fileStatus.status = 'done';
             this.profileImage = null;
             this.profileImageFileName = null;
          }
@@ -150,6 +215,32 @@ export class UserComponent implements OnInit {
             this.sendNotification(NotificationType.ERROR, err.error.message);
          }
       ))
+   }
+
+   public onUpdateCurrentUser(user: User): void {
+      this.refreshing = true;
+      this.currentUsername = this.authService.getUserFromLocalCache().username;
+
+      const formData = this.userService.createUserData(this.currentUsername, user, this.profileImage);
+
+      this.subscriptions.push(this.userService.updateUser(formData).subscribe(
+         (res: User) => {
+            //update user in the cache
+            this.authService.addUserToLocalCache(res);
+            this.getUsers(false);
+            this.profileImage = null;
+            this.profileImageFileName = null;
+            this.sendNotification(NotificationType.SUCCESS, `${res.firstName} ${res.lastName} updated successfuly.`);
+            this.loggedInUser = res;
+            this.refreshing = false;
+         },
+         (err: HttpErrorResponse) => {
+            this.sendNotification(NotificationType.ERROR, err.error.message);
+            this.profileImage = null;
+            this.profileImageFileName = null;
+            this.refreshing = false;
+         }
+      ));
    }
 
    public onResetPassword(emailForm: FormGroup): void {
@@ -179,6 +270,11 @@ export class UserComponent implements OnInit {
       this.editUserForm.patchValue(this.editUser);
 
       this.clickButton('openUserEdit');
+   }
+
+   public onProfileEnter(): void {
+      this.changeTitle('Profile');
+      this.profileUserForm.patchValue(this.loggedInUser);
    }
 
    public saveNewUser(): void {

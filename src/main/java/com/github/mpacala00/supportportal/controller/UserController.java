@@ -125,6 +125,7 @@ public class UserController extends ExceptionHandling {
 
     @DeleteMapping("/delete/{id}")
     @PreAuthorize("hasAnyAuthority('user:delete')")
+//    @PreAuthorize("hasRole('ROLE_SUPER_ADMIN')")
     public ResponseEntity<HttpResponse> deleteUser(@PathVariable("id") String id) {
         userService.deleteUser(Long.valueOf(id));
         return response("User of id " + id + " successfully deleted", HttpStatus.OK);
