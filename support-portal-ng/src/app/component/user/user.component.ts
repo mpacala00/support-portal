@@ -1,5 +1,5 @@
 import { HttpErrorResponse, HttpEvent, HttpEventType, HttpResponse } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
@@ -11,15 +11,17 @@ import { AuthenticationService } from 'src/app/service/authentication.service';
 import { NotificationService } from 'src/app/service/notification.service';
 import { UserService } from 'src/app/service/user.service';
 import { Role } from 'src/app/enum/role.enum';
+import { SubSink } from 'subsink';
 
 @Component({
    selector: 'app-user',
    templateUrl: './user.component.html',
    styleUrls: ['./user.component.scss']
 })
-export class UserComponent implements OnInit {
+export class UserComponent implements OnInit, OnDestroy {
 
-   private subscriptions: Subscription[] = [];
+   // private subscriptions: Subscription[] = [];
+   private subs = new SubSink();
 
    public refreshing: boolean = false;
    public selectedUser: User;
@@ -93,11 +95,18 @@ export class UserComponent implements OnInit {
       this.getUsers(true);
    }
 
+   ngOnDestroy(): void {
+      //unsubscribe to avoid memory leaks
+      // this.subscriptions.forEach(sub => sub.unsubscribe());
+      //unsubscribe using SubSink library
+      this.subs.unsubscribe();
+   }
+
    public getUsers(showNotification: boolean): void {
       this.refreshing = true;
 
       //using subs list to make it easy to destroy them
-      this.subscriptions.push(
+      this.subs.add(
          this.userService.getUsers().subscribe(
             (res: User[]) => {
                this.userService.addUsersToCache(res);
@@ -124,7 +133,7 @@ export class UserComponent implements OnInit {
       formData.append('username', this.loggedInUser.username);
       formData.append('profileImage', this.profileImage);
 
-      this.subscriptions.push(this.userService.updateProfileImage(formData).subscribe(
+      this.subs.add(this.userService.updateProfileImage(formData).subscribe(
          (event: HttpEvent<any>) => {
             this.reportUploadProgress(event);
          },
@@ -167,7 +176,7 @@ export class UserComponent implements OnInit {
    //new user post
    public onAddNewUser(): void {
       const formData = this.userService.createUserData(null, this.newUserForm.value, this.profileImage);
-      this.subscriptions.push(this.userService.addUser(formData).subscribe(
+      this.subs.add(this.userService.addUser(formData).subscribe(
          (res: User) => {
             this.clickButton('new-user-close'); //close modal
             this.getUsers(false); //refresh users without showing notification
@@ -189,7 +198,7 @@ export class UserComponent implements OnInit {
    //used ngModel
    public onUpdateUser(): void {
       const formData = this.userService.createUserData(this.currentUsername, this.editUserForm.value, this.profileImage);
-      this.subscriptions.push(this.userService.updateUser(formData).subscribe(
+      this.subs.add(this.userService.updateUser(formData).subscribe(
          (res: User) => {
             this.clickButton('closeEditUserModalButton'); //close modal
             this.getUsers(false); //refresh users without showing notification
@@ -207,7 +216,7 @@ export class UserComponent implements OnInit {
    }
 
    public onDeleteUser(username: string): void {
-      this.subscriptions.push(this.userService.deleteUser(username).subscribe(
+      this.subs.add(this.userService.deleteUser(username).subscribe(
          (res: CustomHttpResponse) => {
             this.sendNotification(NotificationType.INFO, res.message);
             this.getUsers(false);
@@ -224,7 +233,7 @@ export class UserComponent implements OnInit {
 
       const formData = this.userService.createUserData(this.currentUsername, user, this.profileImage);
 
-      this.subscriptions.push(this.userService.updateUser(formData).subscribe(
+      this.subs.add(this.userService.updateUser(formData).subscribe(
          (res: User) => {
             //update user in the cache
             this.authService.addUserToLocalCache(res);
@@ -248,7 +257,7 @@ export class UserComponent implements OnInit {
       this.refreshing = true;
       const emailAddress = emailForm.value['email'];
 
-      this.subscriptions.push(
+      this.subs.add(
          this.userService.resetPassword(emailAddress).subscribe(
             (res: CustomHttpResponse) => {
                this.refreshing = false;
