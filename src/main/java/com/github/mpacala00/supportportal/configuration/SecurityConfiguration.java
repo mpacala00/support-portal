@@ -4,8 +4,6 @@ import com.github.mpacala00.supportportal.constant.SecurityConstant;
 import com.github.mpacala00.supportportal.filter.JwtAccessDeniedHandler;
 import com.github.mpacala00.supportportal.filter.JwtAuthenticationEntryPoint;
 import com.github.mpacala00.supportportal.filter.JwtAuthorizationFilter;
-import lombok.AccessLevel;
-import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -22,7 +20,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+//@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true) NEVER make these methods private
 @EnableWebSecurity
 //security at method level, i. e. @PreAuthorize(value = "hasAnyAuthority('user:delete')")
 //https://developer.okta.com/blog/2019/06/20/spring-preauthorize

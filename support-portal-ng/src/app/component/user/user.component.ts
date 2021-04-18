@@ -209,7 +209,7 @@ export class UserComponent implements OnInit {
       this.subscriptions.push(this.userService.deleteUser(username).subscribe(
          (res: CustomHttpResponse) => {
             this.sendNotification(NotificationType.INFO, res.message);
-            this.getUsers(true);
+            this.getUsers(false);
          },
          (err: HttpErrorResponse) => {
             this.sendNotification(NotificationType.ERROR, err.error.message);

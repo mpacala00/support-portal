@@ -13,7 +13,7 @@ public interface UserService {
     User findByUsername(String username);
     User findByEmail(String email);
 
-    User register(String firstName, String lastName, String username, String email) throws UsernameExistsException, EmailExistsException, UserNotFoundException;
+    User register(String firstName, String lastName, String username, String password, String email) throws UsernameExistsException, EmailExistsException, UserNotFoundException;
 
     List<User> findAll();
 

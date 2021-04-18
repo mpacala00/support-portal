@@ -53,7 +53,7 @@ public class UserController extends ExceptionHandling {
     public ResponseEntity<User> register(@RequestBody @NotNull User user)
             throws UsernameExistsException, UserNotFoundException, EmailExistsException {
         User registeredUser = userService.register(user.getFirstName(), user.getLastName(), user.getUsername(),
-                user.getEmail());
+                user.getPassword(), user.getEmail());
 
         return new ResponseEntity<User>(registeredUser, HttpStatus.OK);
     }
@@ -123,9 +123,10 @@ public class UserController extends ExceptionHandling {
         return response(EMAIL_SENT + email, HttpStatus.OK);
     }
 
+    //hasRole() adds the 'ROLE_' prefix to the value
+    //hasAuthority() checks the value without adding anything
     @DeleteMapping("/delete/{username}")
-    @PreAuthorize("hasAnyAuthority('user:delete')")
-//    @PreAuthorize("hasRole('ROLE_SUPER_ADMIN')")
+    @PreAuthorize("hasAuthority('user:delete')")
     public ResponseEntity<HttpResponse> deleteUser(@PathVariable("username") String username) throws IOException {
         userService.deleteUser(username);
         return response("User " + username + " successfully deleted", HttpStatus.OK);

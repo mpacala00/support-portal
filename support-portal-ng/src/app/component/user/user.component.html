@@ -243,6 +243,11 @@
                   <div class="card ml-3 mt-3">
                      <div class="card-body">
                         <h6>Permissions from role:</h6>
+                        <ul class="list-group">
+                           <li class="list-group-item" *ngFor="let permission of loggedInUser?.authorities">
+                              {{ permission }}
+                           </li>
+                        </ul>
                      </div>
                   </div>
 

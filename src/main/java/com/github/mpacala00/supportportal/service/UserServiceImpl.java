@@ -175,12 +175,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public User register(String firstName, String lastName, String username, String email)
+    public User register(String firstName, String lastName, String username, String password, String email)
             throws UsernameExistsException, EmailExistsException, UserNotFoundException {
         //first arg empty because it is a registration
-        validateUsernameAndEmail(StringUtils.EMPTY, email, email);
+        validateUsernameAndEmail(StringUtils.EMPTY, username, email);
 
-        String password = generatePassword();
+//        String password = generatePassword();
         User user = User.builder().userId(generateUserId()).firstName(firstName).lastName(lastName).username(username)
                 .email(email).joinDate(LocalDate.now()).password(encodePassword(password)).isActive(true)
                 .isNotLocked(true).role(Role.ROLE_USER.name()).authorities(Role.ROLE_USER.getAuthorities())

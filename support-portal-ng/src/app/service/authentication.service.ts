@@ -63,6 +63,9 @@ export class AuthenticationService {
 
    public saveToken(token: string): void {
       this.token = token;
+      if (this.cookies.check('token')) {
+         this.cookies.delete('token');
+      }
 
       //this.cookies.set(name, value, {expires?, path?, domain?, secure?, sameSite?})
       this.cookies.set('token', token);
@@ -77,6 +80,9 @@ export class AuthenticationService {
    }
 
    public addUserToLocalCache(user: User): void {
+      if (this.cookies.check('user')) {
+         this.cookies.delete('user');
+      }
       this.cookies.set('user', JSON.stringify(user));
    }
 
