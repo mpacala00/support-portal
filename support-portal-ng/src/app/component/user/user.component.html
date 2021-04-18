@@ -23,7 +23,7 @@
                Users
             </a>
 
-            <a class="nav-item nav-link ml-4" data-toggle="tab" href="#reset-password"
+            <a [hidden]="!isAdmin()" class="nav-item nav-link ml-4" data-toggle="tab" href="#reset-password"
                (click)="changeTitle('Settings')">
                <i class="fa fa-cogs"></i>
                Settings
@@ -46,7 +46,8 @@
                   <input type="search" name="searchUsers" (input)="searchUsers($event.target.value)"
                      class="form-control mr-sm-2" placeholder="Search users">
                </div>
-               <button type="button" class="btn btn-info" data-toggle="modal" data-target="#addUserModal">
+               <button [hidden]="!isManager()" type="button" class="btn btn-info" data-toggle="modal"
+                  data-target="#addUserModal">
                   <i class="fa fa-plus"></i>&nbsp;New User
                </button>
             </div>
@@ -95,7 +96,7 @@
                         <button class="btn btn-outline-info" (click)="onEditUser(u)">
                            <i class="fas fa-edit"></i>
                         </button>
-                        <button class="btn btn-outline-danger" (click)="onDeleteUser(u.username)">
+                        <button [hidden]="!isAdmin()" class="btn btn-outline-danger" (click)="onDeleteUser(u.username)">
                            <i class="fas fa-trash"></i>
                         </button>
                      </div>
@@ -110,7 +111,7 @@
       <button [hidden]="true" type="button" id="openUserEdit" data-toggle="modal" data-target="#editUserModal"></button>
 
       <!-- change password -->
-      <div class="tab-pane fade" id="reset-password">
+      <div [hidden]="!isAdmin()" class="tab-pane fade" id="reset-password">
          <form [formGroup]="emailForm" (ngSubmit)="onResetPassword(emailForm)">
             <fieldset>
                <legend>User password managmenet</legend>
@@ -347,8 +348,8 @@
       </div>
 
       <!-- new user modal -->
-      <div class="modal draggable fade bd-example-modal-lg" id="addUserModal" tabindex="-1" role="dialog"
-         aria-labelledby="exampleModalCenterTile" aria-hidden="true">
+      <div [hidden]="!isManager()" class="modal draggable fade bd-example-modal-lg" id="addUserModal" tabindex="-1"
+         role="dialog" aria-labelledby="exampleModalCenterTile" aria-hidden="true">
          <div class="modal-dialog" role="document">
             <div class="modal-content">
                <div class="modal-header">
@@ -383,7 +384,7 @@
                            <input type="text" name="email" required class="form-control" formControlName="email">
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group" *ngIf="isAdmin()">
                            <label for="authority">Role</label>
                            <select name="role" required class="form-control" formControlName="role">
                               <option value="ROLE_USER">USER</option>
@@ -392,6 +393,11 @@
                               <option value="ROLE_ADMIN">ADMIN</option>
                               <option value="ROLE_SUPER_ADMIN">SUPER ADMIN</option>
                            </select>
+                        </div>
+                        <div class="form-group" *ngIf="!isAdmin()">
+                           <label for="authority">Role</label>
+                           <input type="text" name="role" required readonly value="ROLE_USER" class="form-control"
+                              formControlName="role">
                         </div>
                         <div class="input-group mb-2">
                            <div class="input-group-prepend">
@@ -446,7 +452,9 @@
             <div class="modal-content">
                <div class="modal-header">
                   <h5 class="modal-title text-center" id="exampleModalLongTitle">
-                     Edit {{ editUser?.firstName }}&nbsp;{{ editUser?.lastName}}</h5>
+                     Edit {{ editUser?.firstName }}&nbsp;{{ editUser?.lastName}}
+                     <small [hidden]="isManager()">(read only)</small>
+                  </h5>
                   <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                      <span aria-hidden="true">&times;</span>
                   </button>
@@ -479,7 +487,10 @@
                         </div>
 
                         <div class="form-group">
-                           <label for="authority">Role</label>
+                           <label for="authority">
+                              Role
+                              <small [hidden]="isAdmin()">(read only)</small>
+                           </label>
                            <select name="role" required class="form-control" formControlName="role"
                               [value]="editUser.role">
                               <option value="ROLE_USER">USER</option>
@@ -509,6 +520,7 @@
                                  <input type="checkbox" name="isActive" class="form-check-input"
                                     formControlName="isActive" [value]="editUser.isActive">
                                  Active
+                                 <small [hidden]="isManager()">(read only)</small>
                               </label>
                            </div>
                            <div class="form-check disabled">
@@ -516,6 +528,7 @@
                                  <input type="checkbox" name="isNotLocked" class="form-check-input"
                                     formControlName="isNotLocked" [value]="editUser.isNotLocked">
                                  Unlocked
+                                 <small [hidden]="isManager()">(read only)</small>
                               </label>
                            </div>
                         </fieldset>

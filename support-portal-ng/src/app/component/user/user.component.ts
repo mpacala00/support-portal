@@ -10,6 +10,7 @@ import { FileUploadStatus } from 'src/app/model/file-upload.status';
 import { AuthenticationService } from 'src/app/service/authentication.service';
 import { NotificationService } from 'src/app/service/notification.service';
 import { UserService } from 'src/app/service/user.service';
+import { Role } from 'src/app/enum/role.enum';
 
 @Component({
    selector: 'app-user',
@@ -66,13 +67,13 @@ export class UserComponent implements OnInit {
 
       //values updated on edit user modal open
       this.editUserForm = new FormGroup({
-         firstName: new FormControl(''),
-         lastName: new FormControl(''),
-         username: new FormControl(''),
-         email: new FormControl(''),
-         role: new FormControl(''),
-         isNotLocked: new FormControl(false),
-         isActive: new FormControl(false)
+         firstName: new FormControl({ value: '', disabled: !this.isManager() }),
+         lastName: new FormControl({ value: '', disabled: !this.isManager() }),
+         username: new FormControl({ value: '', disabled: !this.isManager() }),
+         email: new FormControl({ value: '', disabled: !this.isManager() }),
+         role: new FormControl({ value: '', disabled: !this.isAdmin() }),
+         isNotLocked: new FormControl({ value: false, disabled: !this.isManager() }),
+         isActive: new FormControl({ value: false, disabled: !this.isManager() })
       });
 
       this.emailForm = new FormGroup({
@@ -313,6 +314,18 @@ export class UserComponent implements OnInit {
       if (results.length == 0 || !searchTerm) {
          this.users = this.userService.getUsersFromCache();
       }
+   }
+
+   public isAdmin(): boolean {
+      return this.getUserRole() === Role.ADMIN || this.getUserRole() === Role.SUPER_ADMIN;
+   }
+
+   public isManager(): boolean {
+      return this.isAdmin() || this.getUserRole() === Role.MANAGER;
+   }
+
+   private getUserRole(): string {
+      return this.authService.getUserFromLocalCache().role;
    }
 
    private sendNotification(type: NotificationType, message: string) {
